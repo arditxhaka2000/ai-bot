@@ -21,7 +21,10 @@ import random
 import re
 from datetime import datetime, timezone
 
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import (
+    ENGLISH_STOP_WORDS,
+    TfidfVectorizer,
+)
 from sklearn.metrics.pairwise import cosine_similarity
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -30,7 +33,7 @@ UNKNOWN_LOG = os.path.join(HERE, "unknown_messages.log")
 
 # How similar (0..1) a message must be to a known phrase to count as a match.
 # Lower = bolder/looser matching, higher = stricter.
-CONFIDENCE_THRESHOLD = 0.30
+CONFIDENCE_THRESHOLD = 0.50
 
 
 class Brain:
@@ -46,7 +49,13 @@ class Brain:
         self._train()
 
     def _train(self):
-        """Build the TF-IDF model from every example phrase we know."""
+        """Build the TF-IDF model from every example phrase we know.
+
+        Two complementary signals:
+          - word-level (stop words removed) keys on *content* words, so
+            "build a rocket" doesn't match on filler like "you"/"can".
+          - char-level n-grams shrug off typos ("helo" -> "hello").
+        We blend them so the bot is both semantic and typo-tolerant."""
         self.phrases = []        # flat list of example phrases
         self.phrase_tags = []    # the intent tag each phrase belongs to
         for intent in self.knowledge["intents"]:
@@ -54,11 +63,15 @@ class Brain:
                 self.phrases.append(pattern.lower())
                 self.phrase_tags.append(intent["tag"])
 
-        # char-level n-grams make it robust to typos and word variations
-        self.vectorizer = TfidfVectorizer(
+        self.word_vectorizer = TfidfVectorizer(
+            analyzer="word", ngram_range=(1, 2), stop_words="english"
+        )
+        self.word_matrix = self.word_vectorizer.fit_transform(self.phrases)
+
+        self.char_vectorizer = TfidfVectorizer(
             analyzer="char_wb", ngram_range=(2, 4)
         )
-        self.matrix = self.vectorizer.fit_transform(self.phrases)
+        self.char_matrix = self.char_vectorizer.fit_transform(self.phrases)
 
     def learn(self, tag, pattern, response=None):
         """Teach the bot a new phrase (and optionally a new response) at
@@ -87,6 +100,13 @@ class Brain:
         if not text:
             return "Did you mean to send something? I didn't catch that. 🙂"
 
+        # Emotion comes first: a clear complaint/insult should get empathy,
+        # never a cheery canned answer that happened to share a word.
+        if self._is_frustrated(text):
+            return ("I'm sorry you're having a rough time with this. 🙏 "
+                    "Tell me what went wrong and I'll do my best to fix it "
+                    "or get a human involved.")
+
         tag, score = self._best_intent(text)
         if tag is not None and score >= CONFIDENCE_THRESHOLD:
             return self._response_for(tag)
@@ -96,10 +116,41 @@ class Brain:
         return self._fallback(text)
 
     def _best_intent(self, text):
-        vec = self.vectorizer.transform([text.lower()])
-        sims = cosine_similarity(vec, self.matrix)[0]
-        best = int(sims.argmax())
-        return self.phrase_tags[best], float(sims[best])
+        low = text.lower()
+        word_sims = cosine_similarity(
+            self.word_vectorizer.transform([low]), self.word_matrix
+        )[0]
+        char_sims = cosine_similarity(
+            self.char_vectorizer.transform([low]), self.char_matrix
+        )[0]
+
+        # Guard against false confidence: if the message's only *known*
+        # content word happens to appear in a pattern (e.g. "worst BOT ever"
+        # -> "are you a bot"), the word signal can read 1.0 off that single
+        # word. Scale it by how many of the message's content words the bot
+        # actually recognises, so unknown-heavy messages fall back instead.
+        word_sims = word_sims * self._word_coverage(low)
+
+        # Per-phrase score = the stronger of the two signals. Content-word
+        # overlap OR a close typo-match both count as evidence.
+        blended = [max(w, c) for w, c in zip(word_sims, char_sims)]
+        best = max(range(len(blended)), key=blended.__getitem__)
+        return self.phrase_tags[best], float(blended[best])
+
+    def _word_coverage(self, text):
+        """Fraction of the message's content words that the bot knows.
+        1.0 if it recognises them all, lower (toward 0) the more the message
+        is made of words it has never seen. Returns 1.0 when there are no
+        content words to judge, so char-level matching is left untouched."""
+        tokens = [
+            t for t in re.findall(r"[a-z']+", text.lower())
+            if t not in ENGLISH_STOP_WORDS
+        ]
+        if not tokens:
+            return 1.0
+        vocab = self.word_vectorizer.vocabulary_
+        known = sum(1 for t in tokens if t in vocab)
+        return known / len(tokens)
 
     def _response_for(self, tag):
         for intent in self.knowledge["intents"]:
@@ -108,6 +159,15 @@ class Brain:
         return self._fallback("")
 
     # ---- fallback reasoner (handles "out of protocol" messages) --------------
+
+    FRUSTRATION_WORDS = (
+        "angry", "annoyed", "useless", "stupid", "worst", "hate",
+        "terrible", "awful", "rubbish", "garbage", "complaint", "sucks",
+        "not working", "doesn't work", "broken", "ridiculous", "scam",
+    )
+
+    def _is_frustrated(self, text):
+        return any(w in text.lower() for w in self.FRUSTRATION_WORDS)
 
     def _fallback(self, text):
         low = text.lower()
@@ -123,15 +183,6 @@ class Brain:
                 "I don't have a confident answer for that. Want me to "
                 "forward it to the team?",
             ])
-
-        # Frustration / complaint? Be empathetic.
-        if any(w in low for w in (
-            "angry", "annoyed", "useless", "stupid", "bad", "worst",
-            "hate", "terrible", "complaint", "not working", "broken",
-        )):
-            return ("I'm sorry you're having a rough time with this. "
-                    "Tell me what went wrong and I'll do my best to sort it "
-                    "out or get a human involved.")
 
         # Looks like a yes/no acknowledgement?
         if low in ("ok", "okay", "k", "cool", "nice", "sure", "yes", "no"):

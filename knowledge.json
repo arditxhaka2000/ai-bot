@@ -40,7 +40,9 @@
       "tag": "who_are_you",
       "patterns": [
         "who are you", "what are you", "what's your name",
-        "are you a bot", "are you human", "what can you do"
+        "are you a bot", "are you human", "what can you do",
+        "are you a real person", "are you real", "is this a real person",
+        "am i talking to a human"
       ],
       "responses": [
         "I'm an automated assistant here to answer your questions. Ask away!",
