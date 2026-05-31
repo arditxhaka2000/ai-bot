@@ -12,6 +12,9 @@ env/
 unknown_messages.log
 *.log
 
+# Tunnel binary (downloaded locally)
+cloudflared.exe
+
 # OS / editor
 .DS_Store
 Thumbs.db

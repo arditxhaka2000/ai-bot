@@ -2,7 +2,8 @@
 app.py — the Facebook Messenger webhook server.
 
 Facebook sends every incoming message here as an HTTP POST. We read the text,
-ask the local brain for a reply, and send it back via the Send API.
+ask the responder (OpenAI first, local brain as fallback) for a reply, and
+send it back via the Send API.
 
   GET  /webhook  -> Facebook's one-time verification handshake
   POST /webhook  -> incoming messages
@@ -12,7 +13,7 @@ from flask import Flask, request
 
 import config
 import messenger
-from brain import brain
+import responder
 
 app = Flask(__name__)
 
@@ -61,7 +62,7 @@ def incoming():
                 )
                 continue
 
-            reply = brain.reply(text)
+            reply = responder.respond(sender_id, text)
             messenger.send_message(sender_id, reply)
 
     return "ok", 200
