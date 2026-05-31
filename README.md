@@ -91,6 +91,27 @@ You need a **Facebook Page** and a **Meta developer app**.
 - Tune `CONFIDENCE_THRESHOLD` in `brain.py` (lower = looser matching).
 - Edit the fallback replies in `brain.py` to match your bot's voice.
 
+## Hosting it live for free (Render)
+
+Running locally needs your PC + a tunnel. To run 24/7, deploy to
+[Render](https://render.com) (free, no card):
+
+1. Push this repo to GitHub.
+2. On Render: **New + → Blueprint** → pick the repo (it reads `render.yaml`).
+3. When prompted, paste the secret env vars: `VERIFY_TOKEN`,
+   `PAGE_ACCESS_TOKEN`, `APP_SECRET`, `OPENAI_API_KEY`.
+4. Deploy. Render gives you a permanent URL like
+   `https://ai-bot-xxxx.onrender.com`.
+5. In Meta → Messenger → Webhooks, set the callback URL to
+   `https://ai-bot-xxxx.onrender.com/webhook` (same verify token).
+
+Notes:
+- The free tier **sleeps after ~15 min idle**, so the first message after a
+  quiet spell is delayed ~30–60s. Keep it awake with a free pinger like
+  [cron-job.org](https://cron-job.org) hitting your `/` URL every 10 min.
+- The filesystem is ephemeral, so runtime learning (`knowledge.json` edits,
+  `unknown_messages.log`) resets on redeploy. The bot itself works fine.
+
 ## Security
 
 `.env` and `*.log` are git-ignored — never commit your tokens. `messenger.py`

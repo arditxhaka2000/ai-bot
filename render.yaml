@@ -1,0 +1,22 @@
+# Render Blueprint — deploys this bot as a free web service.
+# In the Render dashboard: New + -> Blueprint -> pick this repo.
+# Secret values (tokens/keys) are marked sync:false, so Render asks you to
+# type them in the dashboard instead of committing them to git.
+services:
+  - type: web
+    name: ai-bot
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --timeout 120
+    envVars:
+      - key: VERIFY_TOKEN
+        sync: false
+      - key: PAGE_ACCESS_TOKEN
+        sync: false
+      - key: APP_SECRET
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: gpt-4o-mini
