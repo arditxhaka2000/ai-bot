@@ -1,0 +1,19 @@
+# Secrets — never commit your real tokens
+.env
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+
+# Runtime data the bot writes
+unknown_messages.log
+*.log
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

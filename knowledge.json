@@ -1,0 +1,84 @@
+{
+  "intents": [
+    {
+      "tag": "greeting",
+      "patterns": [
+        "hi", "hello", "hey", "good morning", "good evening",
+        "what's up", "yo", "howdy", "hey there", "hiya"
+      ],
+      "responses": [
+        "Hey! 👋 How can I help you today?",
+        "Hello! What can I do for you?",
+        "Hi there! Ask me anything."
+      ]
+    },
+    {
+      "tag": "goodbye",
+      "patterns": [
+        "bye", "goodbye", "see you", "see ya", "talk later",
+        "cya", "i'm leaving", "good night", "catch you later"
+      ],
+      "responses": [
+        "See you later! 👋",
+        "Bye! Come back anytime.",
+        "Take care!"
+      ]
+    },
+    {
+      "tag": "thanks",
+      "patterns": [
+        "thanks", "thank you", "appreciate it", "thx",
+        "thank you so much", "that helps", "cheers"
+      ],
+      "responses": [
+        "You're welcome! 😊",
+        "Anytime!",
+        "Happy to help!"
+      ]
+    },
+    {
+      "tag": "who_are_you",
+      "patterns": [
+        "who are you", "what are you", "what's your name",
+        "are you a bot", "are you human", "what can you do"
+      ],
+      "responses": [
+        "I'm an automated assistant here to answer your questions. Ask away!",
+        "I'm a bot — but a helpful one. What do you need?"
+      ]
+    },
+    {
+      "tag": "hours",
+      "patterns": [
+        "what are your hours", "when are you open", "opening hours",
+        "are you open now", "what time do you close", "business hours"
+      ],
+      "responses": [
+        "We're open Monday to Friday, 9am–6pm. 🕘",
+        "Our hours are 9am to 6pm on weekdays."
+      ]
+    },
+    {
+      "tag": "pricing",
+      "patterns": [
+        "how much does it cost", "what's the price", "pricing",
+        "how much", "is it free", "do you charge", "what are your rates"
+      ],
+      "responses": [
+        "Pricing depends on what you need — tell me a bit more and I'll point you in the right direction.",
+        "Happy to help with pricing! What product or service are you asking about?"
+      ]
+    },
+    {
+      "tag": "contact",
+      "patterns": [
+        "how do i contact you", "contact info", "phone number",
+        "email", "how can i reach you", "talk to a human", "support"
+      ],
+      "responses": [
+        "You can reach a human at support@example.com — I'll make sure they see your message too.",
+        "Want me to connect you with the team? Drop your question and I'll pass it along."
+      ]
+    }
+  ]
+}
