@@ -26,7 +26,7 @@ def respond(sender_id, text):
     history.append({"role": "user", "content": text})
 
     reply = llm.generate_reply(list(history))
-    source = "openai"
+    source = llm.active_provider() or "?"
     if reply is None:
         # OpenAI disabled or failed — use the local brain, with its own
         # per-user follow-up state so multi-turn flows work offline too.

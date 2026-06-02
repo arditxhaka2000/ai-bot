@@ -38,6 +38,36 @@ runs short conversations offline too.
 `brain.learn(tag, phrase, response, lang)` to add knowledge at runtime (it
 retrains instantly).
 
+## The smart (LLM) brain — answers anything, on-brand
+
+The local brain above is fast, free, and never down — but it only answers what's
+in `knowledge.json`. To let the bot **formulate brand-new sentences for
+questions you never pre-wrote** (in English *or* Albanian), add an LLM key and it
+becomes the *first* brain; the local brain stays as the always-on fallback.
+
+- **Provider** — auto-selected: **Gemini** if `GEMINI_API_KEY` is set, else
+  **OpenAI** if `OPENAI_API_KEY` is set, else local-only. Force one with
+  `LLM_PROVIDER=gemini|openai|local`.
+- **Free option (recommended): Google Gemini.** Get a free key (no card) at
+  <https://aistudio.google.com/app/apikey>, put it in `.env` as
+  `GEMINI_API_KEY=...`, done.
+- **Grounded in your facts.** The LLM's system prompt is built from
+  `config.SYSTEM_PROMPT` *plus* the company facts pulled from `knowledge.json`,
+  so it uses your real hours/prices/policies instead of inventing them — one
+  source of truth. Edit `knowledge.json` and both brains update.
+- **On-brand guardrails.** It replies in the customer's language, stays on
+  logistics, politely steers off-topic questions back, never fabricates prices
+  or tracking statuses, and offers human handoff when unsure (see
+  `config.SYSTEM_PROMPT`).
+- **Never down.** If the LLM is unavailable or errors, the bot silently falls
+  back to the local brain.
+
+Quick check after adding a key:
+
+```powershell
+python try_llm.py
+```
+
 ## Tests
 
 ```powershell
@@ -135,7 +165,8 @@ Running locally needs your PC + a tunnel. To run 24/7, deploy to
 1. Push this repo to GitHub.
 2. On Render: **New + → Blueprint** → pick the repo (it reads `render.yaml`).
 3. When prompted, paste the secret env vars: `VERIFY_TOKEN`,
-   `PAGE_ACCESS_TOKEN`, `APP_SECRET`, `OPENAI_API_KEY`.
+   `PAGE_ACCESS_TOKEN`, `APP_SECRET`, and (for the smart brain) `GEMINI_API_KEY`
+   — or leave the LLM key blank to run on the free local brain only.
 4. Deploy. Render gives you a permanent URL like
    `https://ai-bot-xxxx.onrender.com`.
 5. In Meta → Messenger → Webhooks, set the callback URL to
