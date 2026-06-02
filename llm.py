@@ -74,18 +74,10 @@ def _system_prompt():
     global _system_prompt_cache
     if _system_prompt_cache is None:
         from brain import brain  # imported lazily to avoid a circular import
-        import quotes
         facts = _company_facts(brain.knowledge)
-        rate_card = quotes.rate_card_text("en")
         _system_prompt_cache = (
             f"{config.SYSTEM_PROMPT}\n\n"
-            f"COMPANY FACTS (the only source for specifics):\n{facts}\n\n"
-            f"RATE CARD (use for price estimates; round weight up to the next "
-            f"kg; always say the final price is confirmed at pickup):\n"
-            f"{rate_card}\n\n"
-            f"TRACKING: when a customer sends a tracking number, our system "
-            f"looks it up automatically — you don't need to. If they ask about "
-            f"tracking without a number, ask them for it."
+            f"COMPANY FACTS (the only source for specifics):\n{facts}"
         )
     return _system_prompt_cache
 

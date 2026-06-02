@@ -12,12 +12,29 @@ graceful handling of attachments, postbacks, and quick replies.
   GET  /stats    -> simple conversation stats (for monitoring)
 """
 
+import threading
+
 from flask import Flask, jsonify, request
 
 import config
 import messenger
 import responder
 import store
+
+# One lock per sender so a person's messages are processed AND answered in the
+# order they arrived — fixes the race where a quick 2nd message gets a reply
+# before a slower 1st one. (Single gunicorn worker keeps this lock global.)
+_sender_locks = {}
+_locks_guard = threading.Lock()
+
+
+def _lock_for(sender_id):
+    with _locks_guard:
+        lock = _sender_locks.get(sender_id)
+        if lock is None:
+            lock = threading.Lock()
+            _sender_locks[sender_id] = lock
+        return lock
 
 app = Flask(__name__)
 
@@ -98,7 +115,12 @@ def _handle_event(event, channel):
     sender_id = event.get("sender", {}).get("id")
     if not sender_id:
         return
+    # Serialize everything for this sender so replies go out in arrival order.
+    with _lock_for(sender_id):
+        _process_event(sender_id, event, channel)
 
+
+def _process_event(sender_id, event, channel):
     message = event.get("message", {})
     postback = event.get("postback", {})
 
@@ -114,7 +136,7 @@ def _handle_event(event, channel):
     # Resolve the text to act on, from the various event types.
     text = _extract_text(message, postback)
 
-    # Attachments (photos, etc.) with no text — e.g. a damage-claim photo.
+    # Attachments (photos, documents, location) with no text.
     if text is None and message.get("attachments"):
         _handle_attachment(sender_id, message["attachments"], channel)
         return
@@ -146,20 +168,16 @@ def _extract_text(message, postback):
 
 def _handle_attachment(sender_id, attachments, channel):
     kinds = {a.get("type") for a in attachments}
-    if "image" in kinds:
-        reply = ("Thanks for the photo! 📷 If this is about a damaged or wrong "
-                 "delivery, please also send your tracking or order number and "
-                 "I'll open a claim and get our team on it. (type 'agent' for a "
-                 "person)")
-    elif "location" in kinds:
-        reply = ("Got your location, thanks! 📍 Tell me the tracking number or "
-                 "what you'd like to do and I'll help.")
+    if "image" in kinds or "file" in kinds:
+        reply = ("Thanks for sending that over! 📎 If it's your authority/MC, "
+                 "insurance, or a rate con, our team will take a look. Mind "
+                 "telling me your equipment and the lanes you run so we can get "
+                 "you set up?")
     else:
-        reply = ("Thanks! I can read text best — tell me in a message what you "
-                 "need (tracking, pricing, a pickup…) and I'll help. 🙂")
+        reply = ("Got it, thanks! Tell me what you're running and what you need "
+                 "— loads, rates, or getting set up — and I'll help. 🚛")
     messenger.send_action(sender_id, "mark_seen")
     messenger.send_message(sender_id, reply)
-    # Log the attachment turn too.
     responder._log(sender_id, f"<attachment:{','.join(sorted(kinds))}>",
                    reply, "attachment", channel, "en")
 

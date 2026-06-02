@@ -1,20 +1,18 @@
 """
-responder.py — decides how to answer each user, and orchestrates everything.
+responder.py — decides how to answer each carrier, and orchestrates everything.
 
 Order of handling for one message:
   0) Get Started      — welcome a brand-new contact.
   1) Rate limit       — shield against spam / runaway LLM cost.
-  2) Human handoff     — if the user asked for a person (or escalated), go quiet
-                         and let the team take over (until they ask for the bot).
-  3) Auto-escalation   — repeated frustration hands off to a human + notifies.
-  4) Tracking number   — look the shipment up and answer with the REAL status.
-  5) Instant quote     — weight + destination -> a real price from the rate card.
-  6) LLM brain         — generative, on-brand, multilingual (Gemini/OpenAI).
-  7) Local brain       — always-on fallback if the LLM is unavailable.
+  2) Human handoff     — if they asked for a person (or escalated), go quiet and
+                         let a teammate take over (until they ask to continue).
+  3) Auto-escalation   — repeated frustration hands the chat to a teammate.
+  4) LLM brain         — generative, on-brand dispatch rep (Gemini/OpenAI).
+  5) Local brain       — always-on fallback if the LLM is unavailable.
 
-State (history, language, handoff) persists in SQLite (store.py) so the bot
-remembers across restarts. Actionable requests are captured as leads for the
-team, and the team can be pinged via a webhook on handoff/new leads.
+State (history, language, handoff) persists in SQLite/Turso (store.py) so the
+bot remembers across restarts. Actionable requests (pricing, competitor rate,
+get-started) are captured as leads for the team, who can be pinged via webhook.
 """
 
 import time
@@ -24,15 +22,12 @@ import requests
 
 import config
 import llm
-import quotes
 import store
-import tracking
-from brain import brain, detect_language, extract_tracking
+from brain import brain, detect_language
 
 store.init()
 
-# Audit log path kept for backward-compat references; audit now lives in SQLite.
-CONVO_LOG = config.DB_PATH
+CONVO_LOG = config.DB_PATH  # kept for backward-compat references
 
 # --- transient (in-memory) state — fine to lose on restart --------------------
 _rate = defaultdict(lambda: deque(maxlen=64))   # sender -> recent timestamps
@@ -42,18 +37,18 @@ RATE_MAX = 20          # messages...
 RATE_WINDOW = 60       # ...per this many seconds
 ESCALATE_AFTER = 2     # consecutive frustrated messages -> human
 
-# Intents worth capturing as a team to-do.
-_ACTIONABLE = {"book_shipment", "schedule_pickup", "address_change",
-               "cancel", "returns", "damaged_lost"}
+# Intents worth capturing as a team to-do (must match tags in knowledge.json).
+_ACTIONABLE = {"get_started", "pricing", "competitor_pricing"}
 
 _HANDOFF_TRIGGERS = (
     "talk to a human", "talk to a person", "speak to someone", "real person",
     "live agent", "customer service", "representative", "agent", "operator",
+    "talk to a dispatcher", "speak to the team", "call me",
     "dua nje operator", "dua te flas me nje njeri", "me lidh me operator",
-    "flas me dike", "perfaqesues", "njeri real",
+    "flas me dike", "perfaqesues", "njeri real", "me merr ne telefon",
 )
-_RESUME_TRIGGERS = ("bot", "boti", "assistant", "asistent", "menu",
-                    "start over", "rifillo")
+_RESUME_TRIGGERS = ("bot", "assistant", "menu", "start over", "rifillo",
+                    "vazhdo", "continue")
 
 
 def _t(lang, en, sq):
@@ -62,22 +57,23 @@ def _t(lang, en, sq):
 
 def _quick_replies(lang):
     if lang == "sq":
-        return ["📦 Gjurmo", "💰 Çmimi", "🚚 Koha", "🧑 Operator"]
-    return ["📦 Track", "💰 Pricing", "🚚 Delivery time", "🧑 Agent"]
+        return ["💲 Çmimi", "🚚 Si funksionon", "📝 Fillo", "🧑 Fol me ekipin"]
+    return ["💲 Pricing", "🚚 How it works", "📝 Get started", "🧑 Talk to a rep"]
 
 
 def respond(sender_id, text, channel="messenger"):
     """Return {reply, quick_replies, source, handoff}. `reply` is None when the
-    bot should stay silent (e.g. a human has taken over)."""
+    bot should stay silent (e.g. a teammate has taken over)."""
     text = (text or "").strip()
     state = store.get_state(sender_id)
     lang = detect_language(text, fallback=state.get("lang") or "en")
 
     # 0) Get Started ----------------------------------------------------------
     if text == "GET_STARTED":
-        msg = ("Welcome to Cargoteer! 👋 I can track your shipment, give "
-               "delivery times & rates, book a pickup, or connect you to a "
-               "human — in English or Albanian. How can I help?")
+        msg = ("Welcome to Cargoteer! 👋 We dispatch for owner-operators and "
+               "small fleets — finding the best-paying loads, negotiating "
+               "rates, and handling brokers and paperwork. What are you "
+               "running, and how can we help?")
         return _finish(sender_id, "GET_STARTED", msg, _quick_replies(lang),
                        "get_started", channel, lang)
 
@@ -89,8 +85,8 @@ def respond(sender_id, text, channel="messenger"):
     # 1) Rate limit -----------------------------------------------------------
     if _rate_limited(sender_id):
         msg = _t(lang,
-                 "You're sending messages very fast — give me a sec to keep up. 🙏",
-                 "Po dërgoni shumë shpejt — më jepni një moment. 🙏")
+                 "Whoa, lots of messages coming in — give me a sec to catch up. 🙏",
+                 "Po vijnë shumë mesazhe — më jepni një moment të vij pas. 🙏")
         return _finish(sender_id, text, msg, None, "ratelimit", channel, lang)
 
     folded = text.lower()
@@ -99,8 +95,8 @@ def respond(sender_id, text, channel="messenger"):
     if state.get("handoff"):
         if any(k == folded or k in folded.split() for k in _RESUME_TRIGGERS):
             store.set_state(sender_id, handoff=False)
-            msg = _t(lang, "I'm back! 🤖 How can I help?",
-                     "U ktheva! 🤖 Si mund t'ju ndihmoj?")
+            msg = _t(lang, "I'm here and happy to keep helping — what do you need?",
+                     "Jam këtu dhe me kënaqësi vazhdoj t'ju ndihmoj — çfarë ju duhet?")
             return _finish(sender_id, text, msg, _quick_replies(lang),
                            "resume", channel, lang)
         return _finish(sender_id, text, None, None, "handoff-silent",
@@ -122,40 +118,17 @@ def respond(sender_id, text, channel="messenger"):
     # Capture actionable requests for the team (works on any answer path).
     _maybe_capture_lead(sender_id, text, channel)
 
-    # 4) Tracking number -> real status ---------------------------------------
-    number = extract_tracking(text)
-    if number and (state.get("awaiting") == "tracking"
-                   or _mostly_tracking(text, number)):
-        reply = _tracking_reply(number, lang)
-        qr = ["📦 " + _t(lang, "Track another", "Gjurmo tjetër"),
-              "🧑 " + _t(lang, "Agent", "Operator")]
-        store.set_state(sender_id, awaiting=None, lang=lang)
-        return _finish(sender_id, text, reply, qr, "tracking", channel, lang)
-
-    # 5) Instant quote when weight + destination are both present -------------
-    weight = quotes.parse_weight(text)
-    zone = quotes.guess_zone(text)
-    if weight and zone:
-        q = quotes.estimate(weight, zone)
-        if q:
-            reply = quotes.format_estimate(q, lang)
-            store.set_state(sender_id, lang=lang)
-            return _finish(sender_id, text, reply, _quick_replies(lang),
-                           "quote", channel, lang)
-
-    # 6) LLM brain ------------------------------------------------------------
+    # 4) LLM brain ------------------------------------------------------------
     history = store.get_history(sender_id, config.HISTORY_TURNS * 2)
     reply = llm.generate_reply(history)
     source = llm.active_provider() or "?"
 
-    # 7) Local brain fallback -------------------------------------------------
+    # 5) Local brain fallback -------------------------------------------------
     if reply is None:
-        result = brain.reply_with_state(
-            text, context={"awaiting": state.get("awaiting"),
-                           "lang": state.get("lang")})
+        result = brain.reply_with_state(text, context={"lang": state.get("lang")})
         reply = result["reply"]
         lang = result["lang"]
-        store.set_state(sender_id, awaiting=result["awaiting"], lang=lang)
+        store.set_state(sender_id, lang=lang)
         source = f"local:{result['intent']}"
         qr = _quick_replies(lang)
     else:
@@ -186,22 +159,18 @@ def _do_handoff(sender_id, text, channel, lang, kind, source):
     _notify(f"🔔 Handoff ({kind}) for {sender_id} [{channel}]: {text!r}")
     if source == "escalation":
         msg = _t(lang,
-                 "I'm sorry this has been frustrating. 🙏 I'm bringing in a "
-                 "Cargoteer team member to help you directly — they'll reply "
-                 "here shortly. (type 'bot' anytime to use the assistant again.)",
-                 "Më vjen keq që ka qenë e bezdisshme. 🙏 Po sjell një anëtar të "
-                 "ekipit Cargoteer që t'ju ndihmojë drejtpërdrejt — do t'ju "
-                 "përgjigjen këtu shpejt. (shkruani 'bot' për asistentin.)")
+                 "I hear you, and I'm sorry for the hassle. 🙏 I'm bringing in a "
+                 "teammate to help you directly — they'll jump in here shortly.",
+                 "Ju kuptoj, dhe më vjen keq për bezdinë. 🙏 Po sjell një koleg "
+                 "që t'ju ndihmojë drejtpërdrejt — do të hyjë këtu shpejt.")
     else:
         msg = _t(lang,
-                 "Sure — I'm connecting you with a Cargoteer team member. "
-                 "They'll reply right here. You can also reach us at "
-                 "support@cargoteer.com / +355 00 000 000. (Type 'bot' anytime "
-                 "to use the assistant again.)",
-                 "Sigurisht — po ju lidh me një anëtar të ekipit Cargoteer. "
-                 "Do t'ju përgjigjen këtu. Mund të na shkruani edhe në "
-                 "support@cargoteer.com / +355 00 000 000. (Shkruani 'bot' "
-                 "kurdo për asistentin.)")
+                 "Absolutely — I'll get a teammate to reach out to you directly. "
+                 "You can also email us at dispatch@cargoteer.com. Mind sharing "
+                 "your equipment and lanes so we're ready to help?",
+                 "Sigurisht — bëj që një koleg t'ju kontaktojë drejtpërdrejt. "
+                 "Mund të na shkruani edhe te dispatch@cargoteer.com. Mund të na "
+                 "thoni automjetin dhe rrugët që të jemi gati t'ju ndihmojmë?")
     return _finish(sender_id, text, msg, None, source, channel, lang)
 
 
@@ -210,26 +179,6 @@ def _maybe_capture_lead(sender_id, text, channel):
     if tag in _ACTIONABLE and score >= 0.5:
         if store.add_lead(sender_id, channel, tag, text):
             _notify(f"📝 New lead ({tag}) from {sender_id} [{channel}]: {text!r}")
-
-
-def _mostly_tracking(text, number):
-    leftover = text.lower().replace(number.lower(), " ").split()
-    return len(leftover) <= 3
-
-
-def _tracking_reply(number, lang):
-    record = tracking.lookup(number)
-    if record:
-        return tracking.format_status(record, lang)
-    return _t(
-        lang,
-        f"I couldn't find shipment {number.upper()} yet. If it was just "
-        f"created, status can take a few hours to appear. Want me to forward "
-        f"it to our team to check? (type 'agent')",
-        f"Nuk e gjeta dërgesën {number.upper()} ende. Nëse sapo është krijuar, "
-        f"statusi mund të shfaqet pas pak orësh. Doni t'ua përcjell ekipit për "
-        f"kontroll? (shkruani 'operator')",
-    )
 
 
 def _notify(message):
@@ -259,7 +208,7 @@ def reset(sender_id):
     _frustration.pop(sender_id, None)
 
 
-# Backward-compatible alias used by app.py's attachment handler.
+# Backward-compatible helper used by app.py's attachment handler.
 def _log(sender_id, text_in, reply, source, channel, lang):
     store.log_turn(sender_id, channel, lang, source, text_in, reply)
     print(f"[responder] ({source}) {text_in!r} -> {reply!r}")

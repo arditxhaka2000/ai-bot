@@ -23,17 +23,17 @@ PROFILE = {
     "get_started": {"payload": "GET_STARTED"},
     "greeting": [
         {"locale": "default",
-         "text": "Hi! 👋 I'm Cargoteer's assistant. I can track shipments, give "
-                 "delivery times & rates, and connect you to a human. Ask me "
-                 "anything — in English or Albanian."}
+         "text": "Welcome to Cargoteer! 👋 We dispatch for owner-operators and "
+                 "small fleets — best-paying loads, strong rate negotiation, and "
+                 "we handle brokers & paperwork. Message us to get started."}
     ],
     "ice_breakers": [
         {"locale": "default",
          "call_to_actions": [
-             {"question": "Track my shipment", "payload": "Track my shipment"},
-             {"question": "How much does shipping cost?", "payload": "How much does shipping cost?"},
-             {"question": "How long does delivery take?", "payload": "How long does delivery take?"},
-             {"question": "Talk to a human", "payload": "agent"},
+             {"question": "What do you charge?", "payload": "What do you charge?"},
+             {"question": "How does dispatch work?", "payload": "How does dispatch work?"},
+             {"question": "I want to get started", "payload": "I want to get started"},
+             {"question": "Talk to the team", "payload": "talk to the team"},
          ]}
     ],
     "persistent_menu": [
@@ -41,9 +41,9 @@ PROFILE = {
             "locale": "default",
             "composer_input_disabled": False,
             "call_to_actions": [
-                {"type": "postback", "title": "📦 Track a shipment", "payload": "Track my shipment"},
-                {"type": "postback", "title": "💰 Pricing", "payload": "How much does shipping cost?"},
-                {"type": "postback", "title": "🧑 Talk to a human", "payload": "agent"},
+                {"type": "postback", "title": "💲 Pricing", "payload": "What do you charge?"},
+                {"type": "postback", "title": "🚚 How it works", "payload": "How does dispatch work?"},
+                {"type": "postback", "title": "📝 Get started", "payload": "I want to get started"},
                 {"type": "web_url", "title": "🌐 Website", "url": "https://cargoteer.com"},
             ],
         }

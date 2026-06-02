@@ -1,37 +1,28 @@
 # ai-bot
 
-A Facebook **Messenger** bot in Python with its own **self-contained,
-bilingual brain** — no Claude, no OpenAI, no paid API required. It learns from a
-knowledge base and reasons about messages it has never seen before, so it always
-replies sensibly — and in the customer's own language — even when someone goes
-"out of protocol". (When an OpenAI key *is* set, the smart brain answers first
-and this brain is the free, always-on fallback.)
+A Facebook/Instagram **Messenger** bot for **Cargoteer**, a truck-dispatching
+service for owner-operators and small fleets. It answers carriers as a **human
+dispatch representative** (never identifies as a bot), handles pricing the way
+the team wants, and captures leads. An LLM (Gemini) writes the replies; a free,
+self-contained **local brain** is the always-on fallback so the bot is never
+down. Bilingual (English + Albanian).
 
 ## How the brain works
 
 Four cooperating layers (see `brain.py`):
 
-- **Language detection** — decides whether the customer wrote in **English** or
+- **Language detection** — decides whether the carrier wrote in **English** or
   **Albanian** (diacritics like `ë`/`ç` plus marker words) and replies in that
-  language. Language is *sticky* across a conversation, so a bare tracking
-  number sent mid-chat is still answered in the language already in use.
-- **Entity extraction** — spots **tracking numbers** and phone numbers in the
-  raw message. A tracking number is the highest-value thing a logistics
-  customer sends, so it's acknowledged directly even with no other matching
-  words.
+  language. Language is *sticky* across a conversation.
 - **Intent matching** — every example phrase becomes two TF-IDF vectors: a
   *word* signal (content words, accent-folded) and a *character* signal (shrugs
   off typos like "helo" → "hello"). An incoming message is compared to
   everything the bot knows; if it's confident, it replies with that intent.
   Pure pleasantries are demoted when a real question is also present, so
-  "Good evening, when does my order arrive?" answers the question.
+  "Hey, what do you charge?" answers the pricing question.
 - **Fallback reasoner** — if nothing matches well, the bot inspects the message
   (question? complaint? small talk? gibberish?) and crafts a reasonable,
   language-matched reply instead of going silent.
-
-**Multi-turn flows** — the brain reports what it expects next (e.g. a tracking
-number after a tracking question); `responder.py` feeds that back so the bot
-runs short conversations offline too.
 
 **Self-improving** — unrecognised messages are logged to
 `unknown_messages.log` (with detected language + confidence), and you can call
@@ -53,12 +44,13 @@ becomes the *first* brain; the local brain stays as the always-on fallback.
   `GEMINI_API_KEY=...`, done.
 - **Grounded in your facts.** The LLM's system prompt is built from
   `config.SYSTEM_PROMPT` *plus* the company facts pulled from `knowledge.json`,
-  so it uses your real hours/prices/policies instead of inventing them — one
+  so it uses the real Cargoteer services/answers instead of inventing them — one
   source of truth. Edit `knowledge.json` and both brains update.
-- **On-brand guardrails.** It replies in the customer's language, stays on
-  logistics, politely steers off-topic questions back, never fabricates prices
-  or tracking statuses, and offers human handoff when unsure (see
-  `config.SYSTEM_PROMPT`).
+- **Human dispatch persona + pricing rules.** It speaks as a real dispatch
+  teammate (never a bot). On pricing it stays competitive, asks the carrier's
+  current rate plus equipment/lanes, offers a customized quote from the team,
+  and **never promises a specific rate or discount**. Off-topic questions are
+  politely steered back (see `config.SYSTEM_PROMPT`).
 - **Never down.** If the LLM is unavailable or errors, the bot silently falls
   back to the local brain.
 
@@ -73,22 +65,18 @@ python try_llm.py
 Beyond the two brains, the bot includes what a real customer-facing service
 needs:
 
-- **Live shipment tracking** — when a customer sends a tracking number, the bot
-  looks it up and replies with the **real status** (location + ETA), instantly,
-  in their language. `tracking.py` reads `shipments.json` (demo data) — swap one
-  function (`_lookup_backend`) for Cargoteer's real tracking API to go live.
-- **Instant price quotes** — "how much to send 5 kg to Tirana?" returns a real,
-  itemised estimate from the rate card (`quotes.py` + `rates.json`). The same
-  rate card is fed to the LLM so it quotes consistently.
-- **Human handoff** — asking for "an agent"/"operator" hands the chat to your
-  team: the bot goes silent so a human can take over, until the customer types
-  "bot" to resume.
+- **Human handoff** — asking for "an agent"/"a real person" hands the chat to
+  your team: the bot goes silent so a teammate can take over, until the carrier
+  types "continue" to resume.
+- **In-order replies** — messages from the same person are serialized with a
+  per-sender lock, so a quick second message can't get answered before the
+  first (fixes the out-of-order race).
 - **Rich Messenger UX** — typing indicators, "seen" receipts, quick-reply
   buttons, and a one-time `setup_messenger_profile.py` that adds a Get Started
   button, greeting, ice-breakers, and a persistent menu.
 - **Robust webhook** — duplicate-message protection (Meta re-delivers on
-  timeout), long-message splitting, send retries, and handling of photos
-  (e.g. damage-claim images), locations, postbacks, and quick replies. Also
+  timeout), long-message splitting, send retries, and handling of attachments
+  (authority/MC, insurance, rate cons), postbacks, and quick replies. Also
   accepts **Instagram** events (same code path).
 - **Persistent memory** — conversation history, per-user state (language,
   awaiting slot, handoff), an audit trail, and captured leads (`store.py`), so
@@ -97,8 +85,8 @@ needs:
   (**Turso/libSQL**) when `TURSO_DATABASE_URL` + `TURSO_AUTH_TOKEN` are set — so
   it persists on Render too — otherwise a local SQLite file. Check yours with
   `python try_db.py`.
-- **Lead capture** — actionable requests (bookings, pickups, address changes,
-  returns, damage claims, escalations) are saved as a team worklist.
+- **Lead capture** — actionable requests (get-started/sign-up, pricing,
+  competitor-rate mentions, escalations) are saved as a team worklist.
 - **Auto-escalation** — repeated frustration hands the chat to a human and
   records a complaint lead.
 - **Team notifications** — set `ADMIN_WEBHOOK_URL` and the bot pings your
@@ -129,9 +117,7 @@ human handoff, rate limiting, and graceful fallback.
 | `llm.py` | Generative brain — Gemini/OpenAI, grounded in your knowledge base |
 | `brain.py` | The local AI brain (language + entities + matching + fallback + learning) |
 | `knowledge.json` | What the bot knows, bilingual (en/sq) — **edit this to customise it** |
-| `store.py` | SQLite persistence: history, state, audit, leads |
-| `tracking.py` + `shipments.json` | Shipment-status lookup (swap in the real API) |
-| `quotes.py` + `rates.json` | Price estimator from the rate card |
+| `store.py` | Persistence (SQLite/Turso): history, state, audit, leads |
 | `messenger.py` | Send API wrapper: typing, splitting, retries, quick replies, dedup |
 | `setup_messenger_profile.py` | One-time Get Started / menu / ice-breakers setup |
 | `config.py` | Loads settings from `.env` |

@@ -119,29 +119,6 @@ def detect_language(text, fallback=DEFAULT_LANG):
     return fallback if fallback in SUPPORTED_LANGS else DEFAULT_LANG
 
 
-# --- entity extraction --------------------------------------------------------
-
-# A tracking number: an optional carrier prefix, a run of digits, an optional
-# country suffix — e.g. RR123456789AL, 1Z999AA10123456784, or a bare 1234567890.
-# Requires >= 7 chars and >= 5 digits so it doesn't fire on prices or "2024".
-_TRACKING_RE = re.compile(r"\b([A-Z]{0,3}\d[\dA-Z]{5,}[A-Z]{0,2})\b")
-_PHONE_RE = re.compile(r"(?<!\w)(\+?\d[\d\s\-]{6,}\d)(?!\w)")
-
-
-def extract_tracking(text):
-    """Return the first plausible tracking number in `text`, or None."""
-    for cand in _TRACKING_RE.findall((text or "").upper()):
-        digits = sum(c.isdigit() for c in cand)
-        if len(cand) >= 7 and digits >= 5:
-            return cand
-    return None
-
-
-def extract_phone(text):
-    m = _PHONE_RE.search(text or "")
-    return m.group(1).strip() if m else None
-
-
 class Brain:
     def __init__(self, knowledge_path=KNOWLEDGE_PATH):
         self.knowledge_path = knowledge_path
@@ -235,20 +212,15 @@ class Brain:
         return self.reply_with_state(message, context)["reply"]
 
     def reply_with_state(self, message, context=None):
-        """Decide a reply and report follow-up state.
+        """Decide a reply and report state.
 
-        Returns {"reply", "lang", "intent", "awaiting", "entities"}.
+        Returns {"reply", "lang", "intent", "awaiting"}. `awaiting` is kept in
+        the shape for the caller's convenience but is currently always None.
 
-        `context` (optional) carries multi-turn state, e.g.
-        {"awaiting": "tracking"} when the previous bot turn asked for a
-        tracking number — that lets a bare number be read as the answer.
-        `awaiting` in the result tells the caller what the bot now expects, so
-        it can feed it back next turn.
+        `context` (optional) carries the conversation language so a message
+        with no language signal is answered in the language already in use.
         """
         text = (message or "").strip()
-        tracking = extract_tracking(text)
-        phone = extract_phone(text)
-        entities = {"tracking": tracking, "phone": phone}
 
         # Match intent first so its language can answer messages that carry no
         # language signal of their own (e.g. "si funksionon" — no marker words).
@@ -261,56 +233,28 @@ class Brain:
         lang = detect_language(text, fallback=(context_lang or matched_lang
                                                or DEFAULT_LANG))
 
-        def out(reply, intent, awaiting=None):
+        def out(reply, intent):
             return {"reply": reply, "lang": lang, "intent": intent,
-                    "awaiting": awaiting, "entities": entities}
+                    "awaiting": None}
 
         if not text:
             return out(self._say("empty", lang), "empty")
 
-        # A tracking number is the highest-value thing a customer can send.
-        # Honour it whether they were just asked for one or volunteered it.
-        awaiting = (context or {}).get("awaiting")
-        if tracking and (awaiting == "tracking"
-                         or self._looks_like_tracking_only(text, tracking)):
-            return out(self._say("tracking_ack", lang, number=tracking),
-                       "tracking_ack")
-
-        # Emotion first: a clear complaint/insult gets empathy, never a cheery
-        # canned answer that happened to share a word.
+        # Emotion first: a clear complaint gets empathy, never a cheery canned
+        # answer that happened to share a word.
         if self._is_frustrated(text):
-            return out(self._say("frustrated", lang), "frustrated",
-                       awaiting="tracking")
+            return out(self._say("frustrated", lang), "frustrated")
 
         if tag is not None and score >= CONFIDENCE_THRESHOLD:
-            # If the customer already included a tracking number while asking
-            # about a shipment, acknowledge it instead of asking again.
-            if tracking and tag in self._TRACKING_FOLLOWUPS:
-                return out(self._say("tracking_ack", lang, number=tracking),
-                           "tracking_ack")
-            # Otherwise, intents that ask for a tracking number set up the next
-            # turn so a bare number lands as the answer.
-            follow = "tracking" if tag in self._TRACKING_FOLLOWUPS else None
-            return out(self._response_for(tag, lang), tag, awaiting=follow)
+            return out(self._response_for(tag, lang), tag)
 
         # Out of protocol — reason about it instead of giving up.
         self._log_unknown(text, score, lang)
         return out(self._fallback(text, lang), "fallback")
 
-    # Intents whose reply invites a tracking number, so the next message that's
-    # just a number is read as that answer.
-    _TRACKING_FOLLOWUPS = {"tracking", "delivery_time", "address_change"}
-
-    def _looks_like_tracking_only(self, text, tracking):
-        """True when the message is basically just the tracking number (maybe
-        with a word or two), so we can answer it unprompted without hijacking
-        a sentence that merely contains a long number."""
-        leftover = _tokens(fold(text.replace(tracking.lower(), " ")))
-        return len(leftover) <= 2
-
-    # Social pleasantries. A customer who opens with "Good evening, when does my
-    # order arrive?" wants the delivery answer, not just "Hello" — so when a
-    # substantive intent also clears the bar, it wins over these.
+    # Social pleasantries. A carrier who opens with "Hey, what do you charge?"
+    # wants the pricing answer, not just "Hello" — so when a substantive intent
+    # also clears the bar, it wins over these.
     SOCIAL_TAGS = {"greeting", "goodbye", "thanks"}
 
     def classify(self, text):
@@ -442,27 +386,23 @@ class Brain:
             "en": ["Did you mean to send something? I didn't catch that. 🙂"],
             "sq": ["A deshët të dërgoni diçka? Nuk e kapa. 🙂"],
         },
-        "tracking_ack": {
-            "en": ["Thanks! Looking up tracking number {number} now — one moment. "
-                   "📦 If it's just been created, status can take a few hours to appear."],
-            "sq": ["Faleminderit! Po kontrolloj numrin e gjurmimit {number} — një moment. "
-                   "📦 Nëse sapo është krijuar, statusi mund të shfaqet pas pak orësh."],
-        },
         "frustrated": {
-            "en": ["I'm sorry you're having a rough time with this. 🙏 Tell me what "
-                   "went wrong — send your tracking or order number and I'll chase it "
-                   "down or get a human involved right away."],
-            "sq": ["Më vjen keq që po kaloni një përvojë të vështirë. 🙏 Më thoni çfarë "
-                   "shkoi keq — dërgoni numrin e gjurmimit ose porosisë dhe e ndjek "
-                   "menjëherë ose ju lidh me një operator."],
+            "en": ["I'm sorry — that's frustrating, and I want to make it right. 🙏 "
+                   "Tell me what's going on and I'll jump on it or get a teammate to "
+                   "help you directly."],
+            "sq": ["Më vjen keq — kjo është e bezdisshme dhe dua ta rregulloj. 🙏 "
+                   "Më thoni çfarë po ndodh dhe e marr përsipër ose sjell një koleg "
+                   "që t'ju ndihmojë drejtpërdrejt."],
         },
         "fallback_question": {
-            "en": ["Good question — I'm not 100% sure on that one. Could you rephrase it, "
-                   "or I can pass it to a human?",
-                   "I don't have a confident answer for that. Want me to forward it to the team?"],
-            "sq": ["Pyetje e mirë — nuk jam plotësisht i sigurt për këtë. Mund ta riformuloni, "
-                   "ose ua përcjell një operatori?",
-                   "Nuk kam një përgjigje të sigurt për këtë. Doni t'ua përcjell ekipit?"],
+            "en": ["Good question — let me get you a precise answer. Mind if a teammate "
+                   "follows up, or can you tell me a bit more about your operation?",
+                   "I want to get that exactly right for you. Can you share your "
+                   "equipment and lanes so I can help, or should a teammate reach out?"],
+            "sq": ["Pyetje e mirë — t'ju jap një përgjigje të saktë. Mund t'ju kontaktojë "
+                   "një koleg, apo më tregoni pak më shumë për operacionin tuaj?",
+                   "Dua t' jua jap saktë. Mund të më thoni automjetin dhe rrugët, apo "
+                   "preferoni t'ju kontaktojë një koleg?"],
         },
         "fallback_ack": {
             "en": ["👍 Got it. Anything else I can help with?"],

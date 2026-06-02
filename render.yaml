@@ -8,7 +8,9 @@ services:
     runtime: python
     plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --timeout 120
+    # 1 worker keeps the per-sender lock, dedup cache, and in-memory state
+    # global; threads give concurrency across different senders.
+    startCommand: gunicorn app:app --workers 1 --threads 8 --bind 0.0.0.0:$PORT --timeout 120
     envVars:
       - key: VERIFY_TOKEN
         sync: false
