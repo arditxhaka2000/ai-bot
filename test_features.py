@@ -124,6 +124,24 @@ def test_lead_captured_for_competitor_pricing():
     assert "competitor_pricing" in kinds
 
 
+def test_contact_info_is_captured_as_lead():
+    u = "t_contact"
+    responder.reset(u)
+    responder.respond(u, "sure, reach me at arditxhaka2000@gmail.com")
+    leads = [ld for ld in store.recent_leads(20) if ld["sender"] == u]
+    contact_leads = [ld for ld in leads if ld["kind"] == "contact"]
+    assert contact_leads, "expected a contact lead"
+    assert "arditxhaka2000@gmail.com" in contact_leads[0]["text"]
+
+
+def test_phone_number_is_captured_as_lead():
+    u = "t_phone"
+    responder.reset(u)
+    responder.respond(u, "call me at +1 312 555 0148")
+    kinds = {ld["kind"] for ld in store.recent_leads(20) if ld["sender"] == u}
+    assert "contact" in kinds
+
+
 def test_auto_escalation_after_repeated_frustration():
     u = "t_escalate"
     responder.reset(u)

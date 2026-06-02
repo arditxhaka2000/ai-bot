@@ -15,6 +15,7 @@ bot remembers across restarts. Actionable requests (pricing, competitor rate,
 get-started) are captured as leads for the team, who can be pinged via webhook.
 """
 
+import re
 import time
 from collections import defaultdict, deque
 
@@ -24,6 +25,10 @@ import config
 import llm
 import store
 from brain import brain, detect_language
+
+# Contact details a carrier might share so the team can follow up.
+_EMAIL_RE = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
+_PHONE_RE = re.compile(r"(?<!\w)(\+?\d[\d\s().-]{7,}\d)(?!\w)")
 
 store.init()
 
@@ -88,6 +93,9 @@ def respond(sender_id, text, channel="messenger"):
                  "Whoa, lots of messages coming in — give me a sec to catch up. 🙏",
                  "Po vijnë shumë mesazhe — më jepni një moment të vij pas. 🙏")
         return _finish(sender_id, text, msg, None, "ratelimit", channel, lang)
+
+    # Always capture shared contact info, whatever the message routes to.
+    _maybe_capture_contact(sender_id, text, channel)
 
     folded = text.lower()
 
@@ -179,6 +187,23 @@ def _maybe_capture_lead(sender_id, text, channel):
     if tag in _ACTIONABLE and score >= 0.5:
         if store.add_lead(sender_id, channel, tag, text):
             _notify(f"📝 New lead ({tag}) from {sender_id} [{channel}]: {text!r}")
+
+
+def _maybe_capture_contact(sender_id, text, channel):
+    """If the carrier shares an email/phone, save it as a high-priority lead
+    WITH recent context, so the promised follow-up actually reaches the team."""
+    email = _EMAIL_RE.search(text)
+    phone = None if email else _PHONE_RE.search(text)
+    contact = (email or phone).group(0).strip() if (email or phone) else None
+    if not contact:
+        return
+    # Build a short transcript so the team has context (rate, equipment, lanes).
+    history = store.get_history(sender_id, 12)
+    convo = " | ".join(f"{m['role']}: {m['content']}" for m in history[-8:])
+    lead_text = f"CONTACT: {contact} — context: {convo}"
+    if store.add_lead(sender_id, channel, "contact", lead_text):
+        _notify(f"📞 Carrier shared contact {contact} ({sender_id}) — follow up "
+                f"with a custom quote. Context: {convo}")
 
 
 def _notify(message):
