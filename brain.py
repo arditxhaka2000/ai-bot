@@ -313,6 +313,19 @@ class Brain:
     # substantive intent also clears the bar, it wins over these.
     SOCIAL_TAGS = {"greeting", "goodbye", "thanks"}
 
+    def classify(self, text):
+        """Public: best intent tag + confidence for a message (no side effects).
+        Used by the responder to capture leads even when the LLM writes the
+        reply. Returns (tag, score)."""
+        if not (text or "").strip():
+            return None, 0.0
+        tag, score, _ = self._best_intent(text)
+        return tag, score
+
+    def is_frustrated(self, text):
+        """Public: True if the message reads as a clear complaint/anger."""
+        return self._is_frustrated(text)
+
     def _best_intent(self, text):
         folded = fold(text)
         word_sims = cosine_similarity(

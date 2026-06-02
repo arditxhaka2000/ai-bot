@@ -90,8 +90,19 @@ needs:
   timeout), long-message splitting, send retries, and handling of photos
   (e.g. damage-claim images), locations, postbacks, and quick replies. Also
   accepts **Instagram** events (same code path).
-- **Audit log** — every turn is written to `conversations.log` (JSONL);
-  `GET /stats` summarises volume by brain/source.
+- **Persistent memory (SQLite)** — conversation history, per-user state
+  (language, awaiting slot, handoff), an audit trail, and captured leads all
+  live in `cargoteer.db` (`store.py`), so the bot remembers across restarts.
+  The LLM gets real multi-turn context ("what's my name?" works).
+- **Lead capture** — actionable requests (bookings, pickups, address changes,
+  returns, damage claims, escalations) are saved as a team worklist.
+- **Auto-escalation** — repeated frustration hands the chat to a human and
+  records a complaint lead.
+- **Team notifications** — set `ADMIN_WEBHOOK_URL` and the bot pings your
+  Slack/Discord on handoff and new leads.
+- **Admin API** — with `ADMIN_TOKEN` set: `GET /admin/leads`,
+  `/admin/conversations`, `/admin/handoffs` (pass `?token=...`). `GET /stats`
+  is open and summarises volume by brain, open leads, and active handoffs.
 - **Abuse/cost guard** — per-user rate limiting.
 
 ## Tests
@@ -115,6 +126,7 @@ human handoff, rate limiting, and graceful fallback.
 | `llm.py` | Generative brain — Gemini/OpenAI, grounded in your knowledge base |
 | `brain.py` | The local AI brain (language + entities + matching + fallback + learning) |
 | `knowledge.json` | What the bot knows, bilingual (en/sq) — **edit this to customise it** |
+| `store.py` | SQLite persistence: history, state, audit, leads |
 | `tracking.py` + `shipments.json` | Shipment-status lookup (swap in the real API) |
 | `quotes.py` + `rates.json` | Price estimator from the rate card |
 | `messenger.py` | Send API wrapper: typing, splitting, retries, quick replies, dedup |

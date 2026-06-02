@@ -12,13 +12,12 @@ graceful handling of attachments, postbacks, and quick replies.
   GET  /stats    -> simple conversation stats (for monitoring)
 """
 
-import os
-
 from flask import Flask, jsonify, request
 
 import config
 import messenger
 import responder
+import store
 
 app = Flask(__name__)
 
@@ -30,23 +29,36 @@ def health():
 
 @app.get("/stats")
 def stats():
-    """Lightweight counters from the audit log (best-effort)."""
-    path = responder.CONVO_LOG
-    total, by_source = 0, {}
-    try:
-        import json
-        with open(path, encoding="utf-8") as f:
-            for line in f:
-                try:
-                    row = json.loads(line)
-                except ValueError:
-                    continue
-                total += 1
-                src = (row.get("source") or "?").split(":")[0]
-                by_source[src] = by_source.get(src, 0) + 1
-    except FileNotFoundError:
-        pass
-    return jsonify({"messages_logged": total, "by_source": by_source})
+    """Counters from the audit store (volume by brain, open leads, handoffs)."""
+    return jsonify(store.stats())
+
+
+def _admin_ok():
+    """Admin endpoints require ?token= matching ADMIN_TOKEN (and it must be set)."""
+    token = request.args.get("token") or request.headers.get("X-Admin-Token")
+    return bool(config.ADMIN_TOKEN) and token == config.ADMIN_TOKEN
+
+
+@app.get("/admin/leads")
+def admin_leads():
+    if not _admin_ok():
+        return "Forbidden", 403
+    status = request.args.get("status")  # e.g. ?status=new
+    return jsonify(store.recent_leads(limit=100, status=status))
+
+
+@app.get("/admin/conversations")
+def admin_conversations():
+    if not _admin_ok():
+        return "Forbidden", 403
+    return jsonify(store.recent_turns(limit=100))
+
+
+@app.get("/admin/handoffs")
+def admin_handoffs():
+    if not _admin_ok():
+        return "Forbidden", 403
+    return jsonify(store.active_handoffs())
 
 
 @app.get("/webhook")

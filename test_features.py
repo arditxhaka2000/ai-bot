@@ -8,14 +8,27 @@ The LLM is forced off here (LLM_PROVIDER=local) so tests never hit the network
 and exercise the deterministic + local-brain paths.
 """
 
+import os  # noqa: E402
+import tempfile  # noqa: E402
+
 import config
 
 config.LLM_PROVIDER = "local"  # force-disable the LLM for hermetic tests
+# Isolate the DB so tests never touch the real cargoteer.db.
+config.DB_PATH = os.path.join(tempfile.gettempdir(), "cargoteer_test.db")
+for _ext in ("", "-wal", "-shm"):
+    try:
+        os.remove(config.DB_PATH + _ext)
+    except OSError:
+        pass
 
 import messenger  # noqa: E402
 import quotes  # noqa: E402
 import responder  # noqa: E402
+import store  # noqa: E402
 import tracking  # noqa: E402
+
+store.init()
 
 
 # --- tracking -----------------------------------------------------------------
@@ -150,6 +163,65 @@ def test_responder_falls_back_to_local_brain():
     r = responder.respond(u, "pershendetje")
     assert r["source"].startswith("local")
     assert r["reply"]
+
+
+def test_get_started_welcome():
+    u = "t_gs"
+    responder.reset(u)
+    r = responder.respond(u, "GET_STARTED")
+    assert r["source"] == "get_started"
+    assert "Cargoteer" in r["reply"]
+
+
+# --- persistence + enrichment -------------------------------------------------
+
+def test_history_persists_in_sqlite():
+    u = "t_persist"
+    responder.reset(u)
+    responder.respond(u, "pershendetje")
+    responder.respond(u, "faleminderit")
+    hist = store.get_history(u, 10)
+    # Each turn stored both the user message and the assistant reply.
+    assert [m["role"] for m in hist][:2] == ["user", "assistant"]
+    contents = " ".join(m["content"] for m in hist)
+    assert "pershendetje" in contents and "faleminderit" in contents
+
+
+def test_state_persists_and_is_sticky():
+    u = "t_state"
+    responder.reset(u)
+    responder.respond(u, "ku eshte porosia ime")  # Albanian tracking ask
+    assert store.get_state(u)["lang"] == "sq"
+
+
+def test_lead_captured_for_actionable_intent():
+    u = "t_lead"
+    responder.reset(u)
+    responder.respond(u, "i want to send a package to Tirana")
+    leads = store.recent_leads(limit=10)
+    kinds = {ld["kind"] for ld in leads if ld["sender"] == u}
+    assert "book_shipment" in kinds
+
+
+def test_auto_escalation_after_repeated_frustration():
+    u = "t_escalate"
+    responder.reset(u)
+    r1 = responder.respond(u, "this is terrible and useless")
+    assert r1["source"] != "escalation"          # first one: normal empathy
+    r2 = responder.respond(u, "still terrible, worst service")
+    assert r2["source"] == "escalation"          # second: hand to a human
+    assert r2["handoff"] is True
+    # A complaint lead was recorded for the team.
+    assert any(ld["kind"] == "complaint"
+               for ld in store.recent_leads(limit=10) if ld["sender"] == u)
+
+
+def test_reset_clears_persisted_state():
+    u = "t_reset"
+    responder.respond(u, "pershendetje")
+    responder.reset(u)
+    assert store.get_history(u, 10) == []
+    assert store.get_state(u)["handoff"] is False
 
 
 # --- standalone runner --------------------------------------------------------

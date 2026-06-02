@@ -62,3 +62,17 @@ SYSTEM_PROMPT = os.getenv(
 # How many previous turns to remember per user (keeps context without
 # sending the whole history every time).
 HISTORY_TURNS = int(os.getenv("HISTORY_TURNS", "6"))
+
+# --- Persistence (SQLite) ---
+# Conversation history, per-user state, audit, and captured leads survive
+# restarts. On Render's free tier the disk is ephemeral; for a permanent store
+# use a mounted disk or external DB. Locally this file just works.
+DB_PATH = os.getenv("DB_PATH", os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "cargoteer.db"))
+
+# --- Team tools (optional) ---
+# Protects the /admin/* endpoints. If blank, those endpoints are disabled.
+ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "")
+# If set, the bot POSTs {"text": ...} here on human handoff / new leads
+# (e.g. a Slack/Discord incoming webhook) so the team gets notified.
+ADMIN_WEBHOOK_URL = os.getenv("ADMIN_WEBHOOK_URL", "")

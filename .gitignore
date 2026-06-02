@@ -11,6 +11,9 @@ env/
 # Runtime data the bot writes
 unknown_messages.log
 *.log
+*.db
+*.db-wal
+*.db-shm
 
 # Tunnel binary (downloaded locally)
 cloudflared.exe
