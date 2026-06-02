@@ -74,10 +74,18 @@ def _system_prompt():
     global _system_prompt_cache
     if _system_prompt_cache is None:
         from brain import brain  # imported lazily to avoid a circular import
+        import quotes
         facts = _company_facts(brain.knowledge)
+        rate_card = quotes.rate_card_text("en")
         _system_prompt_cache = (
             f"{config.SYSTEM_PROMPT}\n\n"
-            f"COMPANY FACTS (the only source for specifics):\n{facts}"
+            f"COMPANY FACTS (the only source for specifics):\n{facts}\n\n"
+            f"RATE CARD (use for price estimates; round weight up to the next "
+            f"kg; always say the final price is confirmed at pickup):\n"
+            f"{rate_card}\n\n"
+            f"TRACKING: when a customer sends a tracking number, our system "
+            f"looks it up automatically — you don't need to. If they ask about "
+            f"tracking without a number, ask them for it."
         )
     return _system_prompt_cache
 
@@ -115,7 +123,14 @@ def _gemini_reply(history):
     payload = {
         "system_instruction": {"parts": [{"text": _system_prompt()}]},
         "contents": contents,
-        "generationConfig": {"temperature": 0.7, "maxOutputTokens": 400},
+        "generationConfig": {
+            "temperature": 0.7,
+            "maxOutputTokens": 500,
+            # Gemini 2.5 "thinks" by default, and those tokens eat the output
+            # budget — which can truncate a reply mid-sentence. We don't need
+            # reasoning for short support answers, so turn it off (also faster).
+            "thinkingConfig": {"thinkingBudget": 0},
+        },
     }
     url = _GEMINI_URL.format(model=config.GEMINI_MODEL)
     resp = requests.post(

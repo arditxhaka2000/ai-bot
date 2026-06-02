@@ -68,26 +68,59 @@ Quick check after adding a key:
 python try_llm.py
 ```
 
+## Production features
+
+Beyond the two brains, the bot includes what a real customer-facing service
+needs:
+
+- **Live shipment tracking** — when a customer sends a tracking number, the bot
+  looks it up and replies with the **real status** (location + ETA), instantly,
+  in their language. `tracking.py` reads `shipments.json` (demo data) — swap one
+  function (`_lookup_backend`) for Cargoteer's real tracking API to go live.
+- **Instant price quotes** — "how much to send 5 kg to Tirana?" returns a real,
+  itemised estimate from the rate card (`quotes.py` + `rates.json`). The same
+  rate card is fed to the LLM so it quotes consistently.
+- **Human handoff** — asking for "an agent"/"operator" hands the chat to your
+  team: the bot goes silent so a human can take over, until the customer types
+  "bot" to resume.
+- **Rich Messenger UX** — typing indicators, "seen" receipts, quick-reply
+  buttons, and a one-time `setup_messenger_profile.py` that adds a Get Started
+  button, greeting, ice-breakers, and a persistent menu.
+- **Robust webhook** — duplicate-message protection (Meta re-delivers on
+  timeout), long-message splitting, send retries, and handling of photos
+  (e.g. damage-claim images), locations, postbacks, and quick replies. Also
+  accepts **Instagram** events (same code path).
+- **Audit log** — every turn is written to `conversations.log` (JSONL);
+  `GET /stats` summarises volume by brain/source.
+- **Abuse/cost guard** — per-user rate limiting.
+
 ## Tests
 
 ```powershell
-python test_brain.py            # quick, no extra deps
-# or: python -m pytest test_brain.py -q
+python test_brain.py            # local-brain behaviour (language, intents, …)
+python test_features.py         # tracking, quotes, handoff, webhook, limits
+# or: python -m pytest -q
 ```
 
 They check behaviour that matters — right intent, right language, typo
-tolerance, entity handling, multi-turn follow-ups, and graceful fallback.
+tolerance, entity handling, multi-turn flows, real tracking/quote answers,
+human handoff, rate limiting, and graceful fallback.
 
 ## Project layout
 
 | File | Purpose |
 |------|---------|
+| `app.py` | Flask webhook server Meta talks to (text, attachments, postbacks, IG) |
+| `responder.py` | Orchestrator: handoff, rate limit, tracking/quote, LLM→local routing |
+| `llm.py` | Generative brain — Gemini/OpenAI, grounded in your knowledge base |
 | `brain.py` | The local AI brain (language + entities + matching + fallback + learning) |
 | `knowledge.json` | What the bot knows, bilingual (en/sq) — **edit this to customise it** |
-| `test_brain.py` | Behavioural tests for the brain |
-| `app.py` | Flask webhook server Facebook talks to |
-| `messenger.py` | Sends replies via the Facebook Send API |
+| `tracking.py` + `shipments.json` | Shipment-status lookup (swap in the real API) |
+| `quotes.py` + `rates.json` | Price estimator from the rate card |
+| `messenger.py` | Send API wrapper: typing, splitting, retries, quick replies, dedup |
+| `setup_messenger_profile.py` | One-time Get Started / menu / ice-breakers setup |
 | `config.py` | Loads settings from `.env` |
+| `test_brain.py`, `test_features.py` | Test suites |
 | `.env.example` | Template for your secrets — copy to `.env` |
 
 ## 1. Install
