@@ -90,10 +90,13 @@ needs:
   timeout), long-message splitting, send retries, and handling of photos
   (e.g. damage-claim images), locations, postbacks, and quick replies. Also
   accepts **Instagram** events (same code path).
-- **Persistent memory (SQLite)** — conversation history, per-user state
-  (language, awaiting slot, handoff), an audit trail, and captured leads all
-  live in `cargoteer.db` (`store.py`), so the bot remembers across restarts.
-  The LLM gets real multi-turn context ("what's my name?" works).
+- **Persistent memory** — conversation history, per-user state (language,
+  awaiting slot, handoff), an audit trail, and captured leads (`store.py`), so
+  the bot remembers across restarts. The LLM gets real multi-turn context
+  ("what's my name?" works). **Dual backend, auto-selected:** a free cloud DB
+  (**Turso/libSQL**) when `TURSO_DATABASE_URL` + `TURSO_AUTH_TOKEN` are set — so
+  it persists on Render too — otherwise a local SQLite file. Check yours with
+  `python try_db.py`.
 - **Lead capture** — actionable requests (bookings, pickups, address changes,
   returns, damage claims, escalations) are saved as a team worklist.
 - **Auto-escalation** — repeated frustration hands the chat to a human and
@@ -221,8 +224,10 @@ Notes:
 - The free tier **sleeps after ~15 min idle**, so the first message after a
   quiet spell is delayed ~30–60s. Keep it awake with a free pinger like
   [cron-job.org](https://cron-job.org) hitting your `/` URL every 10 min.
-- The filesystem is ephemeral, so runtime learning (`knowledge.json` edits,
-  `unknown_messages.log`) resets on redeploy. The bot itself works fine.
+- The filesystem is ephemeral, so a *local* SQLite DB and runtime
+  `knowledge.json` edits reset on redeploy. Set `TURSO_DATABASE_URL` +
+  `TURSO_AUTH_TOKEN` (free cloud DB) so conversation history, leads, and state
+  **persist across deploys**. The bot works fine either way.
 
 ## Security
 

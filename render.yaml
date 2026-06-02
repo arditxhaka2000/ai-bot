@@ -26,6 +26,11 @@ services:
         value: gpt-4o-mini
       - key: LLM_PROVIDER
         value: auto
+      # Free cloud DB (Turso) so data persists across deploys. Set both.
+      - key: TURSO_DATABASE_URL
+        sync: false
+      - key: TURSO_AUTH_TOKEN
+        sync: false
       # Optional team tools (leave unset to disable).
       - key: ADMIN_TOKEN
         sync: false

@@ -63,10 +63,19 @@ SYSTEM_PROMPT = os.getenv(
 # sending the whole history every time).
 HISTORY_TURNS = int(os.getenv("HISTORY_TURNS", "6"))
 
-# --- Persistence (SQLite) ---
-# Conversation history, per-user state, audit, and captured leads survive
-# restarts. On Render's free tier the disk is ephemeral; for a permanent store
-# use a mounted disk or external DB. Locally this file just works.
+# --- Persistence ---
+# The store auto-selects its backend:
+#   • Turso (libSQL, free cloud DB) when TURSO_DATABASE_URL + TURSO_AUTH_TOKEN
+#     are set — persists on Render's ephemeral disk too.
+#   • otherwise a local SQLite file at DB_PATH (great for local dev / tests).
+#
+# Set up Turso (free) once:
+#   1) https://turso.tech  ->  install CLI or use the dashboard
+#   2) turso db create cargoteer
+#   3) turso db show --url cargoteer        -> TURSO_DATABASE_URL (libsql://...)
+#   4) turso db tokens create cargoteer     -> TURSO_AUTH_TOKEN
+TURSO_DATABASE_URL = os.getenv("TURSO_DATABASE_URL", "")
+TURSO_AUTH_TOKEN = os.getenv("TURSO_AUTH_TOKEN", "")
 DB_PATH = os.getenv("DB_PATH", os.path.join(
     os.path.dirname(os.path.abspath(__file__)), "cargoteer.db"))
 
