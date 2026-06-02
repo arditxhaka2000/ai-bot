@@ -65,9 +65,26 @@ def test_delivery_time():
 
 
 def test_payment_and_returns():
-    assert intent_of("can i pay cash on delivery") == "payment"
-    assert intent_of("a mund te paguaj kesh") == "payment"
+    assert intent_of("what payment methods do you accept") == "payment"
+    assert intent_of("menyrat e pageses") == "payment"
+    # Cash-on-delivery has its own, more specific intent.
+    assert intent_of("can i pay cash on delivery") == "cash_on_delivery"
+    assert intent_of("a mund te paguaj kesh") == "cash_on_delivery"
     assert intent_of("i want to return my order") == "returns"
+
+
+def test_new_logistics_intents():
+    assert intent_of("more infos from your company") == "about_company"
+    assert intent_of("tregomi per kompanine") == "about_company"
+    assert intent_of("what services do you offer") == "services"
+    assert intent_of("i want to send a package") == "book_shipment"
+    assert intent_of("schedule a pickup") == "schedule_pickup"
+    assert intent_of("do you ship internationally") == "international"
+    assert intent_of("my package is damaged") == "damaged_lost"
+    assert intent_of("what's the maximum weight") == "weight_size"
+    assert intent_of("i missed my delivery") == "missed_delivery"
+    assert intent_of("i need an invoice") == "invoice"
+    assert intent_of("where are you located") == "locations"
 
 
 def test_reply_is_in_users_language():
@@ -142,6 +159,22 @@ def test_tracking_followup_flow():
     t2 = brain.reply_with_state("123456789012", context={"awaiting": t1["awaiting"]})
     assert t2["intent"] == "tracking_ack"
     assert "123456789012" in t2["reply"]
+
+
+def test_language_falls_back_to_matched_pattern():
+    # "si funksionon" has no language marker words, but it matches an Albanian
+    # pattern — so the reply should come back in Albanian, not default English.
+    r = brain.reply_with_state("si funksionon")
+    assert r["intent"] == "how_it_works"
+    assert r["lang"] == "sq"
+
+
+def test_damage_routes_to_claim_not_generic_frustration():
+    # Damage/loss gets the dedicated claim flow, not generic empathy.
+    assert intent_of("my parcel arrived broken") == "damaged_lost"
+    assert intent_of("pakoja arriti e thyer") == "damaged_lost"
+    # ...but a pure rant still gets the empathetic frustration reply.
+    assert intent_of("this is the worst, useless service") == "frustrated"
 
 
 def test_language_is_sticky_for_signalless_messages():

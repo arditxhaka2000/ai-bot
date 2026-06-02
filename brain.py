@@ -177,11 +177,13 @@ class Brain:
         into one space (so a folded query is comparable to any phrase)."""
         self.phrases = []        # accent-folded example phrases
         self.phrase_tags = []    # the intent tag each phrase belongs to
+        self.phrase_langs = []   # the language each phrase was written in
         for intent in self.knowledge["intents"]:
             for lang in SUPPORTED_LANGS:
                 for pattern in self._patterns_for(intent, lang):
                     self.phrases.append(fold(pattern))
                     self.phrase_tags.append(intent["tag"])
+                    self.phrase_langs.append(lang)
 
         # Word signal: content words (English stop words dropped — Albanian has
         # no list, but its function words are short and low-IDF anyway).
@@ -244,11 +246,20 @@ class Brain:
         it can feed it back next turn.
         """
         text = (message or "").strip()
-        # Inherit the conversation's language when this message has no signal.
-        lang = detect_language(text, fallback=(context or {}).get("lang", DEFAULT_LANG))
         tracking = extract_tracking(text)
         phone = extract_phone(text)
         entities = {"tracking": tracking, "phone": phone}
+
+        # Match intent first so its language can answer messages that carry no
+        # language signal of their own (e.g. "si funksionon" — no marker words).
+        tag, score, matched_lang = (
+            self._best_intent(text) if text else (None, 0.0, DEFAULT_LANG)
+        )
+        # Language priority: explicit signal in THIS message > conversation
+        # language > the matched pattern's language > default.
+        context_lang = (context or {}).get("lang")
+        lang = detect_language(text, fallback=(context_lang or matched_lang
+                                               or DEFAULT_LANG))
 
         def out(reply, intent, awaiting=None):
             return {"reply": reply, "lang": lang, "intent": intent,
@@ -271,7 +282,6 @@ class Brain:
             return out(self._say("frustrated", lang), "frustrated",
                        awaiting="tracking")
 
-        tag, score = self._best_intent(text)
         if tag is not None and score >= CONFIDENCE_THRESHOLD:
             # If the customer already included a tracking number while asking
             # about a shipment, acknowledge it instead of asking again.
@@ -319,28 +329,31 @@ class Brain:
         # left untouched, so typo-matches ("helo" -> "hello") still count.
         word_sims = word_sims * self._word_coverage(folded)
 
-        # Aggregate to one (blended, char) score per tag — best of its phrases.
+        # Aggregate to one (blended, char, lang) per tag — best of its phrases.
         # The char score is kept only as a tiebreak: two intents often tie on
         # the blended score when stop-word removal collapses the query to a
         # single shared word ("where do you ship to" -> "ship", in both
         # `coverage` and `pricing`). The char signal sees the *whole* phrase, so
-        # it favours the one the message actually resembles end to end.
+        # it favours the one the message actually resembles end to end. `lang`
+        # is the language of the winning phrase, used to answer in the right
+        # language when the message itself carries no language signal.
         agg = {}
         for i, tag in enumerate(self.phrase_tags):
             blended = max(word_sims[i], char_sims[i])
             cur = agg.get(tag)
-            if cur is None or (blended, char_sims[i]) > cur:
-                agg[tag] = (blended, char_sims[i])
+            if cur is None or (blended, char_sims[i]) > (cur[0], cur[1]):
+                agg[tag] = (blended, char_sims[i], self.phrase_langs[i])
 
-        ranked = sorted(agg.items(), key=lambda kv: kv[1], reverse=True)
-        top_tag, (top_score, _) = ranked[0]
+        ranked = sorted(agg.items(), key=lambda kv: (kv[1][0], kv[1][1]),
+                        reverse=True)
+        top_tag, (top_score, _, top_lang) = ranked[0]
 
         # Demote a social opener if a substantive intent also clears the bar.
         if top_tag in self.SOCIAL_TAGS:
-            for tag, (score, _) in ranked[1:]:
+            for tag, (score, _, lang) in ranked[1:]:
                 if tag not in self.SOCIAL_TAGS and score >= CONFIDENCE_THRESHOLD:
-                    return tag, float(score)
-        return top_tag, float(top_score)
+                    return tag, float(score), lang
+        return top_tag, float(top_score), top_lang
 
     def _word_coverage(self, folded_text):
         """Fraction of the message's content words the bot knows. 1.0 if it
@@ -364,17 +377,21 @@ class Brain:
     # ---- fallback reasoner (handles "out of protocol" messages) --------------
 
     FRUSTRATION_WORDS = {
+        # Note: damage/loss words ("broken", "damaged", "lost", "prishur") are
+        # deliberately NOT here — the dedicated `damaged_lost` intent handles
+        # those with a better claim flow (asks for a photo, opens a claim).
         "en": (
             "angry", "annoyed", "useless", "stupid", "worst", "hate",
             "terrible", "awful", "rubbish", "garbage", "complaint", "sucks",
-            "not working", "doesn't work", "broken", "ridiculous", "scam",
-            "never arrived", "still waiting", "lost my", "where is my money",
+            "ridiculous", "scam", "fed up", "unacceptable", "disappointed",
+            "still waiting", "where is my money", "no one helps",
         ),
         "sq": (
             "i zemeruar", "e zemeruar", "nervozuar", "tmerzitur", "keq",
-            "i keq", "e keqe", "ankese", "nuk funksionon", "s'funksionon",
-            "prishur", "qesharake", "mashtrim", "turp", "skandal", "humbur",
-            "nuk ka ardhur", "ende pres", "po pres", "vonese", "vonuar",
+            "i keq", "e keqe", "ankese", "qesharake", "mashtrim", "turp",
+            "skandal", "e papranueshme", "i zhgenjyer", "e zhgenjyer",
+            "ende pres", "po pres prej kohesh", "ku jane parate e mia",
+            "askush nuk ndihmon",
         ),
     }
 

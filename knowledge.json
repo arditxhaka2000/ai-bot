@@ -1,11 +1,11 @@
 {
-  "_comment": "Bilingual knowledge base (en = English, sq = Albanian/Shqip). Each intent has patterns and responses per language. The brain detects the user's language and replies in it; if an intent lacks a response in that language it falls back to the other. Edit freely — the brain retrains automatically.",
+  "_comment": "Bilingual knowledge base for Cargoteer (en = English, sq = Albanian/Shqip). Each intent has patterns and responses per language. The brain detects the user's language and replies in it; if an intent lacks a response in a language it falls back to the other. Responses with business specifics (prices, hours, phone, email, limits, policies) use sensible placeholders — replace them with Cargoteer's real values. Edit freely; the brain retrains automatically.",
   "intents": [
     {
       "tag": "greeting",
       "patterns": {
-        "en": ["hi", "hello", "hey", "good morning", "good evening", "what's up", "yo", "howdy", "hey there", "hiya", "good afternoon"],
-        "sq": ["pershendetje", "tungjatjeta", "tung", "ckemi", "c'kemi", "ckemi si je", "hej", "miremengjes", "mirembrema", "miredita", "pershendetje si jeni"]
+        "en": ["hi", "hello", "hey", "good morning", "good evening", "good afternoon", "what's up", "yo", "howdy", "hey there", "hiya", "hello there", "hi there", "greetings", "morning", "evening"],
+        "sq": ["pershendetje", "tungjatjeta", "tung", "ckemi", "c'kemi", "ckemi si je", "hej", "miremengjes", "mirembrema", "miredita", "pershendetje si jeni", "tjeta", "si je", "si jeni", "ckemi shoku"]
       },
       "responses": {
         "en": ["Hey! 👋 How can I help you today?", "Hello! What can I do for you?", "Hi there! Ask me anything about your shipments or our services."],
@@ -15,63 +15,129 @@
     {
       "tag": "goodbye",
       "patterns": {
-        "en": ["bye", "goodbye", "see you", "see ya", "talk later", "cya", "i'm leaving", "good night", "catch you later"],
-        "sq": ["mirupafshim", "shihemi", "u pafshim", "naten e mire", "diten e mire", "shihemi me vone", "po iki"]
+        "en": ["bye", "goodbye", "see you", "see ya", "talk later", "cya", "i'm leaving", "good night", "catch you later", "that's all", "i'm done", "nothing else"],
+        "sq": ["mirupafshim", "shihemi", "u pafshim", "naten e mire", "diten e mire", "shihemi me vone", "po iki", "kaq", "asgje tjeter", "mbarova", "ok mjafton"]
       },
       "responses": {
-        "en": ["See you later! 👋", "Bye! Come back anytime.", "Take care!"],
-        "sq": ["Mirupafshim! 👋", "Shihemi! Kthehuni kurdo.", "Ju uroj një ditë të mbarë!"]
+        "en": ["See you later! 👋", "Bye! Come back anytime.", "Take care — message us whenever you need anything."],
+        "sq": ["Mirupafshim! 👋", "Shihemi! Kthehuni kurdo.", "Ju uroj një ditë të mbarë — na shkruani sa herë të keni nevojë."]
       }
     },
     {
       "tag": "thanks",
       "patterns": {
-        "en": ["thanks", "thank you", "appreciate it", "thx", "thank you so much", "that helps", "cheers"],
-        "sq": ["faleminderit", "flm", "te falenderoj", "ju faleminderit", "shume faleminderit", "me ndihmove"]
+        "en": ["thanks", "thank you", "appreciate it", "thx", "thank you so much", "that helps", "cheers", "ty", "many thanks", "thanks a lot", "perfect thanks"],
+        "sq": ["faleminderit", "flm", "te falenderoj", "ju faleminderit", "shume faleminderit", "me ndihmove", "faleminderit shume", "ju jam mirenjohes", "perfekt faleminderit"]
       },
       "responses": {
-        "en": ["You're welcome! 😊", "Anytime!", "Happy to help!"],
-        "sq": ["S'ka përse! 😊", "Me kënaqësi!", "Gjithmonë në shërbimin tuaj!"]
+        "en": ["You're welcome! 😊", "Anytime!", "Happy to help — anything else?"],
+        "sq": ["S'ka përse! 😊", "Me kënaqësi!", "Gjithmonë në shërbimin tuaj — diçka tjetër?"]
+      }
+    },
+    {
+      "tag": "compliment",
+      "patterns": {
+        "en": ["great service", "you're awesome", "love it", "excellent", "amazing service", "you guys are great", "well done", "fast delivery thanks", "very helpful", "good job"],
+        "sq": ["sherbim i shkelqyer", "jeni te mrekullueshem", "shume mire", "ekselente", "punoni shkelqyeshem", "dergese e shpejte faleminderit", "shume te dobishem", "bravo", "punoni mire"]
+      },
+      "responses": {
+        "en": ["Thank you so much — that means a lot! 🙌 We're always here if you need anything.", "We really appreciate that! 😊 Glad we could help."],
+        "sq": ["Faleminderit shumë — kjo ka shumë rëndësi për ne! 🙌 Jemi gjithmonë këtu për ju.", "E vlerësojmë shumë! 😊 Gëzohemi që mundëm të ndihmojmë."]
       }
     },
     {
       "tag": "who_are_you",
       "patterns": {
-        "en": ["who are you", "what are you", "what's your name", "are you a bot", "are you human", "what can you do", "are you a real person", "are you real", "is this a real person", "am i talking to a human"],
-        "sq": ["kush je", "kush jeni", "a je bot", "a je robot", "a je njeri", "a je person real", "po flas me njeri", "cili eshte emri yt", "cfare je", "cfare mund te besh"]
+        "en": ["who are you", "what are you", "what's your name", "are you a bot", "are you human", "are you a real person", "are you real", "is this a real person", "am i talking to a human", "is this automated", "who am i talking to", "are you ai"],
+        "sq": ["kush je", "kush jeni", "a je bot", "a je robot", "a je njeri", "a je person real", "po flas me njeri", "cili eshte emri yt", "cfare je", "a je makineri", "me ke kend po flas", "a je inteligjence artificiale"]
       },
       "responses": {
-        "en": ["I'm an automated assistant for our delivery service, here to answer your questions 24/7. Ask away!", "I'm a bot — but a helpful one. I can track shipments, give delivery times, rates and more. What do you need?"],
-        "sq": ["Jam një asistent automatik i shërbimit tonë të dërgesave, këtu për t'ju ndihmuar 24/7. Më pyetni!", "Jam një bot — por ndihmues. Gjurmoj dërgesa, jap kohë dorëzimi, çmime e më shumë. Si mund t'ju shërbej?"]
+        "en": ["I'm Cargoteer's automated assistant, here 24/7 to help with tracking, delivery times, rates and more. If you'd rather talk to a person, just say 'agent' and I'll connect you.", "I'm a bot — but a helpful one. I can track shipments, give delivery times and rates, book pickups and more. What do you need?"],
+        "sq": ["Jam asistenti automatik i Cargoteer, këtu 24/7 për gjurmim, kohë dorëzimi, çmime e më shumë. Nëse doni të flisni me një person, shkruani 'operator' dhe ju lidh.", "Jam një bot — por ndihmues. Gjurmoj dërgesa, jap kohë dorëzimi e çmime, rezervoj marrje e më shumë. Si mund t'ju shërbej?"]
+      }
+    },
+    {
+      "tag": "about_company",
+      "patterns": {
+        "en": ["tell me about your company", "more info about your company", "more infos from your company", "what is cargoteer", "who is cargoteer", "about you", "about your company", "more information", "tell me more", "company info", "what do you guys do", "what is this company", "info please", "give me more details", "i want to know more"],
+        "sq": ["tregomi per kompanine", "me shume info per kompanine", "cfare eshte cargoteer", "kush eshte cargoteer", "rreth jush", "per kompanine tuaj", "me shume informacion", "tregomi me shume", "informacion per kompanine", "cfare beni ju", "cfare kompanie eshte kjo", "me jep me shume detaje", "dua te di me shume"]
+      },
+      "responses": {
+        "en": ["Cargoteer is a logistics & delivery company. We ship parcels and freight locally and internationally, with live tracking, flexible payment (including cash on delivery), and door-to-door service. 📦 Want details on pricing, delivery times, or coverage?", "We're Cargoteer — we move your packages from A to B safely and on time, nationwide and abroad. I can help with rates, tracking, pickups, and returns. What would you like to know?"],
+        "sq": ["Cargoteer është një kompani logjistike dhe dërgesash. Transportojmë pako dhe ngarkesa brenda vendit dhe ndërkombëtarisht, me gjurmim në kohë reale, pagesë fleksibël (përfshirë pagesë në dorëzim) dhe shërbim derë më derë. 📦 Doni detaje për çmimet, kohën e dorëzimit apo mbulimin?", "Jemi Cargoteer — i çojmë pakot tuaja nga pika A në pikën B sigurt dhe në kohë, brenda vendit dhe jashtë. Ndihmoj me çmime, gjurmim, marrje pakosh dhe kthime. Çfarë doni të dini?"]
+      }
+    },
+    {
+      "tag": "services",
+      "patterns": {
+        "en": ["what services do you offer", "what do you offer", "what can you do", "list of services", "what services", "what kind of services", "how can you help me", "what do you provide", "services", "what options do you have"],
+        "sq": ["cfare sherbimesh ofroni", "cfare ofroni", "cfare mund te beni", "lista e sherbimeve", "cilat sherbime", "cfare lloj sherbimesh", "si mund te me ndihmoni", "cfare ofroni ju", "sherbimet", "cfare opsionesh keni"]
+      },
+      "responses": {
+        "en": ["Here's what I can help with at Cargoteer:\n• 📦 Track a shipment\n• 🚚 Delivery times & coverage\n• 💰 Rates & cash on delivery\n• 📅 Book a pickup / send a parcel\n• 📍 Change an address or reschedule\n• ↩️ Returns & damaged/lost parcels\n• 👤 Talk to a human\nJust tell me what you need!", "We offer parcel & freight delivery (local + international), live tracking, scheduled pickups, cash on delivery, returns, and customer support. What do you need help with?"],
+        "sq": ["Ja me çfarë mund t'ju ndihmoj te Cargoteer:\n• 📦 Gjurmim i një dërgese\n• 🚚 Kohë dorëzimi dhe mbulim\n• 💰 Çmime dhe pagesë në dorëzim\n• 📅 Rezervim marrjeje / dërgim pakoje\n• 📍 Ndryshim adrese ose riplanifikim\n• ↩️ Kthime dhe pako të dëmtuara/humbura\n• 👤 Bisedë me operator\nThjesht më thoni çfarë ju nevojitet!", "Ofrojmë dërgesa pakosh dhe ngarkesash (brenda vendit + ndërkombëtare), gjurmim në kohë reale, marrje të planifikuara, pagesë në dorëzim, kthime dhe mbështetje. Për çfarë ju duhet ndihmë?"]
+      }
+    },
+    {
+      "tag": "how_it_works",
+      "patterns": {
+        "en": ["how does it work", "how do i send a package", "how does shipping work", "how do i use this", "how do i start", "how does delivery work", "what's the process", "how to ship with you", "explain the process"],
+        "sq": ["si funksionon", "si te dergoj nje pako", "si funksionon transporti", "si ta perdor kete", "si te filloj", "si funksionon dergesa", "cili eshte procesi", "si te dergoj me ju", "me shpjego procesin"]
+      },
+      "responses": {
+        "en": ["It's simple: 1) Tell us the pickup and delivery address, 2) we collect the parcel (or you drop it at a branch), 3) you get a tracking number, 4) we deliver and you pay on delivery or online. Want me to start a booking?", "1) Book a pickup or drop off your parcel, 2) we weigh & label it, 3) track it live with your number, 4) delivery to the door. Shall I help you book one?"],
+        "sq": ["Është e thjeshtë: 1) Na thoni adresën e marrjes dhe të dorëzimit, 2) e marrim pakon (ose e lini në një degë), 3) merrni një numër gjurmimi, 4) e dorëzojmë dhe paguani në dorëzim ose online. Doni të nis një rezervim?", "1) Rezervoni marrjen ose lini pakon, 2) e peshojmë dhe etiketojmë, 3) e gjurmoni me numrin tuaj, 4) dorëzim derë më derë. Doni t'ju ndihmoj të rezervoni?"]
       }
     },
     {
       "tag": "hours",
       "patterns": {
-        "en": ["what are your hours", "when are you open", "opening hours", "are you open now", "what time do you close", "business hours"],
-        "sq": ["cilat jane oraret", "kur jeni hapur", "orari i punes", "a jeni hapur tani", "deri ne sa jeni hapur", "orari"]
+        "en": ["what are your hours", "when are you open", "opening hours", "are you open now", "what time do you close", "business hours", "what time do you open", "are you open on weekends", "open on saturday", "open on sunday", "working hours"],
+        "sq": ["cilat jane oraret", "kur jeni hapur", "orari i punes", "a jeni hapur tani", "deri ne sa jeni hapur", "orari", "ne sa hapeni", "a punoni fundjave", "a punoni te shtune", "a punoni te diele", "oraret e punes"]
       },
       "responses": {
-        "en": ["Our office is open Monday–Friday, 9am–6pm. 🕘 But I'm here 24/7 to help with tracking and questions.", "Office hours are 9am–6pm on weekdays. I never sleep, though — ask me anytime."],
-        "sq": ["Zyra jonë është e hapur nga e hëna në të premte, 09:00–18:00. 🕘 Por unë jam këtu 24/7 për gjurmim e pyetje.", "Oraret e zyrës janë 09:00–18:00 në ditët e javës. Unë s'fle kurrë — më pyetni kurdo."]
+        "en": ["Our office and pickups run Monday–Friday 9am–6pm and Saturday 9am–2pm; closed Sundays. 🕘 I'm here 24/7 for tracking and questions, though.", "Office hours: Mon–Fri 9am–6pm, Sat 9am–2pm. I never sleep — ask me anytime."],
+        "sq": ["Zyra dhe marrjet punojnë e hënë–e premte 09:00–18:00 dhe e shtunë 09:00–14:00; të dielën mbyllur. 🕘 Por unë jam këtu 24/7 për gjurmim e pyetje.", "Oraret e zyrës: Hën–Pre 09:00–18:00, Sht 09:00–14:00. Unë s'fle kurrë — më pyetni kurdo."]
+      }
+    },
+    {
+      "tag": "holidays",
+      "patterns": {
+        "en": ["are you open on holidays", "holiday hours", "open during holidays", "do you deliver on holidays", "open on new year", "closed for holidays"],
+        "sq": ["a jeni hapur ne festa", "orari i festave", "a punoni ne festa", "a dergoni ne festa", "a jeni hapur per vit te ri", "mbyllur per festa"]
+      },
+      "responses": {
+        "en": ["On public holidays our offices are closed and deliveries pause, resuming the next working day. Tracking still works 24/7. Need a date checked?", "We don't run pickups or deliveries on public holidays, but everything resumes the next working day."],
+        "sq": ["Në festat zyrtare zyrat janë mbyllur dhe dërgesat ndalojnë, duke vazhduar ditën tjetër të punës. Gjurmimi punon 24/7. Doni të kontrolloj një datë?", "Nuk bëjmë marrje apo dorëzime në festat zyrtare, por gjithçka rifillon ditën tjetër të punës."]
       }
     },
     {
       "tag": "pricing",
       "patterns": {
-        "en": ["how much does it cost", "what's the price", "pricing", "how much", "is it free", "do you charge", "what are your rates", "shipping cost", "how much to ship", "delivery price", "how much is delivery"],
-        "sq": ["sa kushton", "sa kushton dergesa", "cmimi", "sa eshte cmimi", "a eshte falas", "sa paguaj per transport", "tarifat", "sa kushton transporti", "cmimi i dergeses", "sa eshte transporti"]
+        "en": ["how much does it cost", "what's the price", "pricing", "how much", "is it free", "do you charge", "what are your rates", "shipping cost", "how much to ship", "delivery price", "how much is delivery", "cost to send a package", "price to send", "how much for a parcel", "quote", "give me a quote", "estimate cost"],
+        "sq": ["sa kushton", "sa kushton dergesa", "cmimi", "sa eshte cmimi", "a eshte falas", "sa paguaj per transport", "tarifat", "sa kushton transporti", "cmimi i dergeses", "sa eshte transporti", "sa kushton te dergosh nje pako", "cmimi per te derguar", "sa per nje pako", "me jep nje cmim", "vleresim cmimi"]
       },
       "responses": {
-        "en": ["Shipping price depends on the destination and the parcel's weight. Tell me where it's going from and to (and roughly how heavy) and I'll point you to a rate. 📦", "Happy to help with pricing! Where is the shipment going from and to?"],
-        "sq": ["Çmimi i transportit varet nga destinacioni dhe pesha e paketës. Më thoni nga ku dhe ku dërgohet (dhe sa peshon afërsisht) dhe ju jap një vlerësim. 📦", "Me kënaqësi ju ndihmoj me çmimet! Nga ku dhe për ku është dërgesa?"]
+        "en": ["Shipping price depends on the destination and the parcel's weight/size. Tell me where it's going from and to (and roughly how heavy) and I'll point you to a rate. 📦", "Happy to help with pricing! Where is the shipment going from and to, and about how heavy is it?"],
+        "sq": ["Çmimi varet nga destinacioni dhe pesha/madhësia e paketës. Më thoni nga ku dhe ku dërgohet (dhe sa peshon afërsisht) dhe ju jap një vlerësim. 📦", "Me kënaqësi ju ndihmoj me çmimet! Nga ku dhe për ku është dërgesa, dhe sa peshon afërsisht?"]
+      }
+    },
+    {
+      "tag": "price_factors",
+      "patterns": {
+        "en": ["what affects the price", "why is it so expensive", "how is the price calculated", "what determines the cost", "does weight affect price", "is price based on distance", "how do you calculate shipping"],
+        "sq": ["cfare ndikon ne cmim", "pse eshte kaq shtrenjte", "si llogaritet cmimi", "cfare e percakton koston", "a ndikon pesha ne cmim", "a bazohet cmimi ne distance", "si e llogaritni transportin"]
+      },
+      "responses": {
+        "en": ["Price is based on three things: weight, dimensions (size), and destination/distance. Express and insurance add a bit more. Tell me those and I'll estimate it.", "We calculate on weight + size + destination. Heavier, larger, or farther = a bit more. Give me the details and I'll work out a price."],
+        "sq": ["Çmimi bazohet në tri gjëra: peshë, përmasa (madhësi) dhe destinacion/distancë. Ekspres dhe sigurimi shtojnë pak. Më thoni këto dhe e vlerësoj.", "Llogarisim sipas peshës + madhësisë + destinacionit. Më e rëndë, më e madhe ose më larg = pak më shumë. Më jepni detajet dhe ju nxjerr një çmim."]
       }
     },
     {
       "tag": "tracking",
       "patterns": {
-        "en": ["where is my order", "track my shipment", "track my package", "shipment status", "tracking", "tracking number", "where is my package", "where is my parcel", "where has my delivery reached", "status of my order", "track order", "i want to track"],
-        "sq": ["ku eshte porosia ime", "gjurmo dergesen", "gjurmim", "statusi i dergeses", "ku eshte paketa ime", "ku eshte porosia", "numri i gjurmimit", "ku ka arritur dergesa", "ku eshte dergesa ime", "dua te gjurmoj", "gjurmo paketen"]
+        "en": ["where is my order", "track my shipment", "track my package", "shipment status", "tracking", "tracking number", "where is my package", "where is my parcel", "where has my delivery reached", "status of my order", "track order", "i want to track", "check my shipment", "follow my package", "is my package out for delivery"],
+        "sq": ["ku eshte porosia ime", "gjurmo dergesen", "gjurmim", "statusi i dergeses", "ku eshte paketa ime", "ku eshte porosia", "numri i gjurmimit", "ku ka arritur dergesa", "ku eshte dergesa ime", "dua te gjurmoj", "gjurmo paketen", "kontrollo dergesen time", "ndiq pakon time", "a eshte nisur per dorezim"]
       },
       "responses": {
         "en": ["Sure — send me your tracking number and I'll check the status for you. 📦", "I can help track that. What's your tracking number?"],
@@ -79,69 +145,245 @@
       }
     },
     {
-      "tag": "delivery_time",
+      "tag": "no_tracking_number",
       "patterns": {
-        "en": ["how long does delivery take", "when will my order arrive", "delivery time", "how many days", "how long to deliver", "when does it arrive", "estimated delivery"],
-        "sq": ["sa zgjat dergesa", "per sa kohe vjen porosia", "kur arrin dergesa", "sa dite duhet", "koha e dorezimit", "kur vjen porosia", "sa kohe duhet"]
+        "en": ["i don't have a tracking number", "i lost my tracking number", "i never got a tracking number", "no tracking number", "where do i find my tracking number", "how do i get a tracking number"],
+        "sq": ["nuk kam numer gjurmimi", "kam humbur numrin e gjurmimit", "nuk mora numer gjurmimi", "pa numer gjurmimi", "ku e gjej numrin e gjurmimit", "si ta marr numrin e gjurmimit"]
       },
       "responses": {
-        "en": ["Domestic deliveries usually arrive in 1–3 business days. International ones take 5–10 business days. 🚚 Send your tracking number for an exact estimate.", "Most local orders arrive within 1–3 working days. Got a tracking number? I'll give you a precise ETA."],
-        "sq": ["Dërgesat brenda vendit zakonisht arrijnë për 1–3 ditë pune. Ato ndërkombëtare marrin 5–10 ditë pune. 🚚 Dërgoni numrin e gjurmimit për një vlerësim të saktë.", "Shumica e porosive vendore arrijnë brenda 1–3 ditëve të punës. Keni një numër gjurmimi? Ju jap kohën e saktë."]
+        "en": ["No problem. I can look it up by the phone number or email used for the order, or connect you to an agent. Which would you prefer? Your tracking number is also in your confirmation SMS/email.", "That's okay — share the phone number or email on the order and I'll help, or say 'agent' to reach a person. (It's usually in your confirmation message.)"],
+        "sq": ["S'ka problem. Mund ta kërkoj me numrin e telefonit ose email-in e përdorur për porosinë, ose t'ju lidh me një operator. Cilën preferoni? Numri i gjurmimit gjendet edhe në SMS-in/email-in e konfirmimit.", "Në rregull — më jepni numrin e telefonit ose email-in e porosisë dhe ju ndihmoj, ose shkruani 'operator' për një person. (Zakonisht është te mesazhi i konfirmimit.)"]
+      }
+    },
+    {
+      "tag": "delivery_time",
+      "patterns": {
+        "en": ["how long does delivery take", "when will my order arrive", "delivery time", "how many days", "how long to deliver", "when does it arrive", "estimated delivery", "how fast is delivery", "when will it be delivered", "delivery estimate", "how soon", "same day delivery", "next day delivery"],
+        "sq": ["sa zgjat dergesa", "per sa kohe vjen porosia", "kur arrin dergesa", "sa dite duhet", "koha e dorezimit", "kur vjen porosia", "sa kohe duhet", "sa e shpejte eshte dergesa", "kur do te dorezohet", "vleresim dorezimi", "sa shpejt", "dorezim brenda dites", "dorezim diten tjeter"]
+      },
+      "responses": {
+        "en": ["Domestic deliveries usually arrive in 1–3 business days; express is next-day in most cities. International takes 5–10 business days. 🚚 Send your tracking number for an exact ETA.", "Most local orders arrive within 1–3 working days (express next-day). Got a tracking number? I'll give you a precise estimate."],
+        "sq": ["Dërgesat brenda vendit zakonisht arrijnë për 1–3 ditë pune; ekspres ditën tjetër në shumicën e qyteteve. Ndërkombëtare 5–10 ditë pune. 🚚 Dërgoni numrin e gjurmimit për kohë të saktë.", "Shumica e porosive vendore arrijnë brenda 1–3 ditëve pune (ekspres ditën tjetër). Keni një numër gjurmimi? Ju jap kohën e saktë."]
       }
     },
     {
       "tag": "coverage",
       "patterns": {
-        "en": ["where do you ship", "do you ship internationally", "do you deliver to", "which areas do you cover", "do you ship abroad", "do you deliver everywhere", "shipping areas"],
-        "sq": ["ku dergoni", "a dergoni jashte", "a dergoni nderkombetare", "ne cilat zona dergoni", "a dergoni ne kosove", "a dergoni kudo", "zonat e mbulimit", "a mbuloni"]
+        "en": ["where do you ship", "do you deliver to", "which areas do you cover", "do you deliver everywhere", "shipping areas", "do you deliver to my city", "do you cover rural areas", "do you deliver to villages", "what areas do you serve", "do you ship nationwide"],
+        "sq": ["ku dergoni", "ne cilat zona dergoni", "a dergoni kudo", "zonat e mbulimit", "a mbuloni", "a dergoni ne qytetin tim", "a dergoni ne fshatra", "a dergoni ne zona rurale", "cilat zona mbuloni", "a dergoni ne gjithe vendin"]
       },
       "responses": {
-        "en": ["We deliver nationwide and internationally. 🌍 Tell me the destination and I'll confirm coverage and time.", "We cover the whole country plus international routes. Where do you need it delivered?"],
-        "sq": ["Dërgojmë në të gjithë vendin dhe ndërkombëtarisht. 🌍 Më thoni destinacionin dhe konfirmoj mbulimin e kohën.", "Mbulojmë të gjithë vendin plus rrugët ndërkombëtare. Ku doni të dorëzohet?"]
+        "en": ["We deliver nationwide — cities and most rural areas — plus international routes. 🌍 Tell me the destination and I'll confirm coverage and time.", "We cover the whole country plus international shipping. Where do you need it delivered?"],
+        "sq": ["Dërgojmë në të gjithë vendin — qytete dhe shumicën e zonave rurale — plus rrugë ndërkombëtare. 🌍 Më thoni destinacionin dhe konfirmoj mbulimin e kohën.", "Mbulojmë të gjithë vendin plus dërgesa ndërkombëtare. Ku doni të dorëzohet?"]
+      }
+    },
+    {
+      "tag": "international",
+      "patterns": {
+        "en": ["do you ship internationally", "do you ship abroad", "international shipping", "ship to germany", "ship to italy", "ship to kosovo", "send abroad", "do you do customs", "customs fees", "international delivery", "overseas shipping"],
+        "sq": ["a dergoni nderkombetare", "a dergoni jashte", "dergesa nderkombetare", "dergoni ne gjermani", "dergoni ne itali", "a dergoni ne kosove", "dergim jashte vendit", "a beni doganen", "tarifat doganore", "dorezim nderkombetar", "transport jashte shtetit"]
+      },
+      "responses": {
+        "en": ["Yes, we ship internationally. 🌍 International parcels take about 5–10 business days; customs duties/taxes (if any) are set by the destination country and are usually paid by the receiver. Tell me the country and rough weight for a quote.", "We do ship abroad! Times are ~5–10 business days and any customs fees depend on the destination country. Which country and how heavy is it?"],
+        "sq": ["Po, dërgojmë ndërkombëtarisht. 🌍 Pakot ndërkombëtare marrin rreth 5–10 ditë pune; taksat doganore (nëse ka) caktohen nga shteti i destinacionit dhe zakonisht paguhen nga marrësi. Më thoni shtetin dhe peshën afërsisht për një çmim.", "Po, dërgojmë jashtë! Koha është ~5–10 ditë pune dhe tarifat doganore varen nga shteti i destinacionit. Cili shtet dhe sa peshon?"]
+      }
+    },
+    {
+      "tag": "schedule_pickup",
+      "patterns": {
+        "en": ["schedule a pickup", "book a pickup", "i want a pickup", "come collect my package", "can you pick up", "arrange collection", "pickup request", "when can you pick up", "i need a courier to collect"],
+        "sq": ["planifiko nje marrje", "rezervo nje marrje", "dua nje marrje", "ejani merrni pakon", "a mund ta merrni", "organizo marrjen", "kerkese per marrje", "kur mund ta merrni", "me duhet nje korrier per ta marre"]
+      },
+      "responses": {
+        "en": ["Happy to arrange a pickup. 📅 Send me the pickup address, a contact phone, and your preferred date/time, and I'll set it up (or connect you to an agent to confirm).", "Sure — give me the pickup address, phone number, and when suits you, and I'll arrange the collection."],
+        "sq": ["Me kënaqësi organizoj një marrje. 📅 Më dërgoni adresën e marrjes, një telefon kontakti dhe datën/orën që preferoni, dhe e rregulloj (ose ju lidh me operator për konfirmim).", "Sigurisht — më jepni adresën e marrjes, numrin e telefonit dhe kur ju vjen mirë, dhe e organizoj marrjen."]
+      }
+    },
+    {
+      "tag": "book_shipment",
+      "patterns": {
+        "en": ["i want to send a package", "i want to ship something", "send a parcel", "create a shipment", "i need to send a box", "how do i book a delivery", "i want to make a delivery", "place an order", "new shipment"],
+        "sq": ["dua te dergoj nje pako", "dua te transportoj dicka", "dergo nje pako", "krijo nje dergese", "dua te dergoj nje kuti", "si te rezervoj nje dergese", "dua te bej nje dorezim", "vendos nje porosi", "dergese e re"]
+      },
+      "responses": {
+        "en": ["Let's get it sent. 📦 I'll need: 1) pickup address, 2) delivery address, 3) what's inside + rough weight, 4) a contact phone. Send those and I'll start it (or hand you to an agent to finalize).", "Great! Share the pickup & delivery addresses, the contents and approximate weight, and a phone number — and we'll get your shipment moving."],
+        "sq": ["Le ta nisim. 📦 Më duhen: 1) adresa e marrjes, 2) adresa e dorëzimit, 3) çfarë ka brenda + pesha afërsisht, 4) një telefon kontakti. Më dërgoni këto dhe e nis (ose ju lidh me operator për finalizim).", "Shkëlqyeshëm! Më jepni adresat e marrjes dhe dorëzimit, përmbajtjen dhe peshën afërsisht, dhe një numër telefoni — dhe e nisim dërgesën tuaj."]
+      }
+    },
+    {
+      "tag": "cancel",
+      "patterns": {
+        "en": ["i want to cancel", "cancel my order", "cancel my shipment", "cancel the delivery", "can i cancel", "stop the delivery", "cancel pickup", "i changed my mind"],
+        "sq": ["dua te anuloj", "anulo porosine", "anulo dergesen", "anulo dorezimin", "a mund te anuloj", "ndalo dorezimin", "anulo marrjen", "ndryshova mendje"]
+      },
+      "responses": {
+        "en": ["I can request a cancellation if the parcel hasn't been dispatched yet. Send me your tracking or order number and I'll check and stop it if possible.", "Sure — give me the tracking/order number and I'll try to cancel it. If it's already on the way, we can arrange a return instead."],
+        "sq": ["Mund të kërkoj anulim nëse pakoja nuk është nisur ende. Më jepni numrin e gjurmimit ose porosisë dhe e kontrolloj e ndaloj nëse është e mundur.", "Sigurisht — më jepni numrin e gjurmimit/porosisë dhe përpiqem ta anuloj. Nëse është nisur, mund të organizojmë kthim."]
+      }
+    },
+    {
+      "tag": "reschedule",
+      "patterns": {
+        "en": ["change the delivery date", "reschedule delivery", "deliver another day", "can you deliver tomorrow instead", "i won't be home", "change delivery time", "deliver later", "postpone delivery", "deliver on a different day"],
+        "sq": ["ndrysho daten e dorezimit", "riplanifiko dorezimin", "dorezo nje dite tjeter", "a mund ta dorezoni neser", "nuk do te jem ne shtepi", "ndrysho oren e dorezimit", "dorezo me vone", "shtyje dorezimin", "dorezo nje dite tjeter"]
+      },
+      "responses": {
+        "en": ["No problem — we can reschedule. Send me your tracking number and the new date/time that works, and I'll update the delivery. 📅", "Sure, let's move it. What's your tracking number and the preferred new day/time?"],
+        "sq": ["S'ka problem — mund ta riplanifikojmë. Më dërgoni numrin e gjurmimit dhe datën/orën e re që ju përshtatet, dhe e përditësoj dorëzimin. 📅", "Sigurisht, ta lëvizim. Cili është numri i gjurmimit dhe dita/ora e re që preferoni?"]
       }
     },
     {
       "tag": "address_change",
       "patterns": {
-        "en": ["i want to change the address", "change delivery address", "i put the wrong address", "can i change the address", "update my address", "wrong address"],
-        "sq": ["dua te ndryshoj adresen", "ndrysho adresen e dergeses", "kam vendosur adrese gabim", "a mund te ndryshoj adresen", "ndryshim adrese", "adresa eshte gabim", "perditeso adresen"]
+        "en": ["i want to change the address", "change delivery address", "i put the wrong address", "can i change the address", "update my address", "wrong address", "fix my address", "deliver to a different address"],
+        "sq": ["dua te ndryshoj adresen", "ndrysho adresen e dergeses", "kam vendosur adrese gabim", "a mund te ndryshoj adresen", "ndryshim adrese", "adresa eshte gabim", "perditeso adresen", "korrigjo adresen", "dorezo ne nje adrese tjeter"]
       },
       "responses": {
-        "en": ["We can change the address as long as the parcel hasn't shipped yet. Send me your tracking number and the new address and I'll pass it to the team. 📍", "Sure — give me the tracking number and the corrected address, and I'll request the change."],
-        "sq": ["Adresën mund ta ndryshojmë nëse dërgesa nuk është nisur ende. Më jepni numrin e gjurmimit dhe adresën e re dhe ua përcjell ekipit. 📍", "Sigurisht — më jepni numrin e gjurmimit dhe adresën e saktë dhe e kërkoj ndryshimin."]
+        "en": ["We can change the address as long as the parcel hasn't been delivered yet. Send me your tracking number and the new address and I'll pass it to the team. 📍", "Sure — give me the tracking number and the corrected address, and I'll request the change."],
+        "sq": ["Adresën mund ta ndryshojmë nëse dërgesa nuk është dorëzuar ende. Më jepni numrin e gjurmimit dhe adresën e re dhe ua përcjell ekipit. 📍", "Sigurisht — më jepni numrin e gjurmimit dhe adresën e saktë dhe e kërkoj ndryshimin."]
+      }
+    },
+    {
+      "tag": "missed_delivery",
+      "patterns": {
+        "en": ["i missed my delivery", "i wasn't home", "nobody was home", "the courier didn't find me", "redeliver my package", "redelivery", "i missed the courier", "delivery failed", "they couldn't deliver"],
+        "sq": ["humba dorezimin", "nuk isha ne shtepi", "askush nuk ishte ne shtepi", "korrieri nuk me gjeti", "ridorezo pakon", "ridorezim", "humba korrierin", "dorezimi deshtoi", "nuk munden ta dorezojne"]
+      },
+      "responses": {
+        "en": ["No worries — we'll try again. Send me your tracking number and I'll schedule a redelivery, or you can pick it up at the nearest branch. Which works for you?", "Happens to everyone! Give me your tracking number and I'll arrange a redelivery or branch pickup."],
+        "sq": ["Pa merak — provojmë sërish. Më dërgoni numrin e gjurmimit dhe planifikoj një ridorëzim, ose mund ta merrni në degën më të afërt. Cila ju përshtatet?", "Ndodh me të gjithë! Më jepni numrin e gjurmimit dhe organizoj ridorëzim ose marrje në degë."]
+      }
+    },
+    {
+      "tag": "damaged_lost",
+      "patterns": {
+        "en": ["my package is damaged", "my parcel arrived broken", "my item is broken", "my package is lost", "lost parcel", "missing package", "my order never arrived", "package damaged in transit", "item missing from package", "my parcel is missing"],
+        "sq": ["pakoja ime eshte demtuar", "pakoja arriti e thyer", "produkti im eshte thyer", "pakoja ime eshte humbur", "pako e humbur", "pako qe mungon", "porosia nuk arriti kurre", "pakoja u demtua gjate transportit", "mungon nje send nga pakoja", "pakoja ime mungon"]
+      },
+      "responses": {
+        "en": ["I'm really sorry about that. 🙏 Let's make it right — send me your tracking number and a photo if it's damaged, and I'll open a claim and get a human on it right away.", "So sorry to hear that. Please share your tracking number (and a photo if damaged) and I'll start a claim and escalate to our team immediately."],
+        "sq": ["Më vjen vërtet keq për këtë. 🙏 Ta rregullojmë — më dërgoni numrin e gjurmimit dhe një foto nëse është dëmtuar, dhe hap një ankesë e vë menjëherë një person në punë.", "Më vjen shumë keq. Ju lutem më jepni numrin e gjurmimit (dhe një foto nëse është dëmtuar) dhe nis një ankesë e ngre menjëherë te ekipi ynë."]
       }
     },
     {
       "tag": "payment",
       "patterns": {
-        "en": ["how can i pay", "payment methods", "can i pay cash", "cash on delivery", "do you accept card", "how do i pay", "payment options"],
-        "sq": ["si mund te paguaj", "menyrat e pageses", "a mund te paguaj kesh", "pagese ne dorezim", "a pranoni karte", "si paguaj", "opsionet e pageses", "pagese kesh"]
+        "en": ["how can i pay", "payment methods", "do you accept card", "how do i pay", "payment options", "can i pay online", "do you take credit card", "bank transfer", "can i pay by card"],
+        "sq": ["si mund te paguaj", "menyrat e pageses", "a pranoni karte", "si paguaj", "opsionet e pageses", "a mund te paguaj online", "a pranoni karte krediti", "transferte bankare", "a mund te paguaj me karte"]
       },
       "responses": {
-        "en": ["We accept cash on delivery, card, and bank transfer. 💳", "You can pay cash on delivery, by card, or by bank transfer — whatever's easiest."],
-        "sq": ["Pranojmë pagesë në dorëzim (kesh), me kartë dhe me transfertë bankare. 💳", "Mund të paguani me para në dorëzim, me kartë ose me transfertë bankare — si t'ju vijë më lehtë."]
+        "en": ["We accept cash on delivery, card, and bank transfer. 💳 You can pay the courier on delivery or online in advance — whatever's easiest.", "Payment options: cash on delivery, card, or bank transfer. Which would you like to use?"],
+        "sq": ["Pranojmë pagesë në dorëzim (kesh), me kartë dhe me transfertë bankare. 💳 Mund të paguani korrierin në dorëzim ose online paraprakisht — si t'ju vijë më lehtë.", "Mënyrat e pagesës: para në dorëzim, kartë ose transfertë bankare. Cilën doni të përdorni?"]
+      }
+    },
+    {
+      "tag": "cash_on_delivery",
+      "patterns": {
+        "en": ["cash on delivery", "can i pay cash", "pay when it arrives", "pay on arrival", "cod", "is cash on delivery available", "do you do cash on delivery", "pay at the door"],
+        "sq": ["pagese ne dorezim", "a mund te paguaj kesh", "paguaj kur te arrije", "paguaj ne arritje", "a ka pagese ne dorezim", "a beni pagese ne dorezim", "paguaj te dera", "pagese kesh"]
+      },
+      "responses": {
+        "en": ["Yes — cash on delivery is available. 💵 You pay the courier when your parcel arrives. For senders, we collect the amount and pay it out to you (a small COD fee may apply).", "We absolutely offer cash on delivery. Pay the courier at the door when it arrives. Anything else you'd like to set up?"],
+        "sq": ["Po — pagesa në dorëzim është e mundur. 💵 Paguani korrierin kur arrin pakoja. Për dërguesit, e arkëtojmë shumën dhe ua paguajmë (mund të aplikohet një tarifë e vogël COD).", "Sigurisht që ofrojmë pagesë në dorëzim. Paguani korrierin te dera kur arrin. Diçka tjetër që doni të rregulloni?"]
+      }
+    },
+    {
+      "tag": "invoice",
+      "patterns": {
+        "en": ["i need an invoice", "can i get a receipt", "send me the invoice", "receipt please", "do you give invoices", "where is my receipt", "tax invoice", "proof of payment"],
+        "sq": ["me duhet nje fature", "a mund te marr nje deftese", "me dergo faturen", "deftesen ju lutem", "a jepni fatura", "ku eshte deftesa ime", "fature tatimore", "deshmi pagese"]
+      },
+      "responses": {
+        "en": ["Of course — we issue invoices/receipts for every shipment. Send me your tracking or order number and I'll arrange the invoice to your email.", "Sure, I can get that to you. What's your tracking/order number, and which email should we send it to?"],
+        "sq": ["Sigurisht — lëshojmë fatura/deftesa për çdo dërgesë. Më jepni numrin e gjurmimit ose porosisë dhe e organizoj faturën në email-in tuaj.", "Sigurisht, mund t'ua dërgoj. Cili është numri i gjurmimit/porosisë dhe në cilin email ta dërgojmë?"]
       }
     },
     {
       "tag": "returns",
       "patterns": {
-        "en": ["i want to return my order", "return policy", "can i return the product", "refund", "money back", "how do i return"],
-        "sq": ["dua te kthej porosine", "politika e kthimit", "a mund te kthej produktin", "rimbursim", "kthim parash", "si te kthej", "kthim porosie"]
+        "en": ["i want to return my order", "return policy", "can i return the product", "refund", "money back", "how do i return", "return an item", "i want my money back", "exchange an item"],
+        "sq": ["dua te kthej porosine", "politika e kthimit", "a mund te kthej produktin", "rimbursim", "kthim parash", "si te kthej", "kthim porosie", "dua paret mbrapsht", "nderro nje produkt"]
       },
       "responses": {
-        "en": ["Returns are accepted within 14 days if the item is undamaged. Send me your order number and I'll start the process. ↩️", "We accept returns within 14 days for undamaged items. What's your order number?"],
-        "sq": ["Kthimet pranohen brenda 14 ditësh nëse produkti është i padëmtuar. Më thoni numrin e porosisë dhe e nis procesin. ↩️", "Pranojmë kthime brenda 14 ditësh për produkte të padëmtuara. Cili është numri i porosisë suaj?"]
+        "en": ["Returns are accepted within 14 days if the item is unused and undamaged. Send me your order number and I'll start the process. ↩️ Refunds go back to your original payment method.", "We accept returns within 14 days for unused items. What's your order number? I'll get the return going."],
+        "sq": ["Kthimet pranohen brenda 14 ditësh nëse produkti është i papërdorur dhe i padëmtuar. Më thoni numrin e porosisë dhe e nis procesin. ↩️ Rimbursimet kthehen në mënyrën fillestare të pagesës.", "Pranojmë kthime brenda 14 ditësh për produkte të papërdorura. Cili është numri i porosisë? E nis kthimin."]
+      }
+    },
+    {
+      "tag": "weight_size",
+      "patterns": {
+        "en": ["what's the maximum weight", "weight limit", "size limit", "how big can the package be", "max parcel size", "is there a weight limit", "can you ship heavy items", "maximum dimensions", "how heavy can it be"],
+        "sq": ["sa eshte pesha maksimale", "kufiri i peshes", "kufiri i madhesise", "sa e madhe mund te jete pakoja", "madhesia maksimale", "a ka kufi peshe", "a dergoni sende te renda", "permasat maksimale", "sa e rende mund te jete"]
+      },
+      "responses": {
+        "en": ["Standard parcels go up to about 30 kg. Heavier or oversized items ship as freight — just tell me the weight and dimensions and I'll arrange the right service. 📏", "Up to ~30 kg is standard; above that we handle it as freight. Send me the weight and size and I'll sort it out."],
+        "sq": ["Pakot standarde shkojnë deri rreth 30 kg. Sendet më të rënda ose tej masës dërgohen si ngarkesë — më thoni peshën dhe përmasat dhe organizoj shërbimin e duhur. 📏", "Deri ~30 kg është standard; mbi këtë e trajtojmë si ngarkesë. Më jepni peshën dhe madhësinë dhe e rregulloj."]
+      }
+    },
+    {
+      "tag": "prohibited",
+      "patterns": {
+        "en": ["what can't i ship", "prohibited items", "can i ship liquids", "can i send batteries", "are there restricted items", "can i ship food", "what is not allowed", "can i send medicine", "dangerous goods"],
+        "sq": ["cfare nuk mund te dergoj", "sende te ndaluara", "a mund te dergoj lengje", "a mund te dergoj bateri", "a ka sende te kufizuara", "a mund te dergoj ushqime", "cfare nuk lejohet", "a mund te dergoj ilace", "mallra te rrezikshme"]
+      },
+      "responses": {
+        "en": ["For safety, we can't ship dangerous goods (flammables, explosives, certain batteries), illegal items, cash, or perishables without special arrangements. Liquids and food may be allowed if sealed and packed properly. Tell me what it is and I'll confirm.", "Restricted: hazardous/flammable materials, weapons, illegal goods, and unpacked perishables. Most other things are fine. What are you sending?"],
+        "sq": ["Për siguri, nuk dërgojmë mallra të rrezikshme (të ndezshme, eksplozive, disa bateri), sende ilegale, para në dorë, ose produkte që prishen pa marrëveshje të veçantë. Lëngjet dhe ushqimet mund të lejohen nëse janë të mbyllura dhe paketuara mirë. Më thoni çfarë është dhe e konfirmoj.", "Të kufizuara: materiale të rrezikshme/ndezëse, armë, mallra ilegale dhe ushqime që prishen pa paketim. Pjesa tjetër zakonisht është në rregull. Çfarë po dërgoni?"]
+      }
+    },
+    {
+      "tag": "insurance",
+      "patterns": {
+        "en": ["is my package insured", "do you offer insurance", "can i insure my shipment", "what if it gets damaged", "insurance cost", "is there coverage for loss", "are valuables covered"],
+        "sq": ["a eshte e siguruar pakoja ime", "a ofroni sigurim", "a mund te siguroj dergesen", "po nese demtohet", "kostoja e sigurimit", "a ka mbulim per humbje", "a mbulohen sendet me vlere"]
+      },
+      "responses": {
+        "en": ["Yes — shipments include basic coverage, and you can add extra insurance for valuable items based on the declared value. Tell me the item's value and I'll quote the insurance.", "We offer optional insurance on top of standard coverage. For valuables, declare the value and I'll add protection. What are you sending?"],
+        "sq": ["Po — dërgesat përfshijnë një mbulim bazë, dhe mund të shtoni sigurim ekstra për sende me vlerë sipas vlerës së deklaruar. Më thoni vlerën e sendit dhe ju jap çmimin e sigurimit.", "Ofrojmë sigurim opsional mbi mbulimin standard. Për sende me vlerë, deklaroni vlerën dhe shtoj mbrojtjen. Çfarë po dërgoni?"]
+      }
+    },
+    {
+      "tag": "packaging",
+      "patterns": {
+        "en": ["how should i pack my item", "do you provide packaging", "packaging tips", "how to pack a parcel", "do i need a box", "can you pack it for me", "do you sell boxes"],
+        "sq": ["si ta paketoj sendin", "a ofroni paketim", "keshilla per paketim", "si te paketoj nje pako", "a me duhet kuti", "a mund ta paketoni ju", "a shisni kuti"]
+      },
+      "responses": {
+        "en": ["Pack items snugly in a sturdy box with padding (bubble wrap or paper), seal it well, and label it clearly. Fragile? Mark it and add extra cushioning. We can also provide packaging at our branches.", "Use a strong box, cushion the contents, and seal all seams. For fragile items add padding and tell us so we handle with care. Need packaging? We've got it at our branches."],
+        "sq": ["Paketoni sendet fort në një kuti të qëndrueshme me mbushje (najlon me flluska ose letër), mbylleni mirë dhe etiketojeni qartë. E thyeshme? Shënojeni dhe shtoni mbushje. Mund të ofrojmë edhe paketim në degët tona.", "Përdorni një kuti të fortë, mbushni përmbajtjen dhe mbyllni të gjitha anët. Për sende të thyeshme shtoni mbushje dhe na thoni që t'i trajtojmë me kujdes. Doni paketim? E kemi në degët tona."]
+      }
+    },
+    {
+      "tag": "business_bulk",
+      "patterns": {
+        "en": ["business account", "bulk shipping", "i have a business", "ship many packages", "do you offer discounts for businesses", "corporate rates", "ecommerce delivery", "regular shipments", "partnership"],
+        "sq": ["llogari biznesi", "dergesa me shumice", "kam nje biznes", "dergoj shume pako", "a ofroni zbritje per biznese", "tarifa per biznese", "dorezim per ecommerce", "dergesa te rregullta", "partneritet"]
+      },
+      "responses": {
+        "en": ["We'd love to work with your business. 🤝 We offer business accounts with discounted rates, scheduled pickups, and e-commerce integration for regular volumes. Tell me roughly how many shipments per month and I'll connect you with our team.", "For businesses we have volume discounts and dedicated support. How many parcels do you ship monthly? I'll get our team to set you up."],
+        "sq": ["Do të kënaqeshim të punonim me biznesin tuaj. 🤝 Ofrojmë llogari biznesi me tarifa të reduktuara, marrje të planifikuara dhe integrim me e-commerce për volume të rregullta. Më thoni afërsisht sa dërgesa në muaj dhe ju lidh me ekipin tonë.", "Për biznese kemi zbritje sipas volumit dhe mbështetje të dedikuar. Sa pako dërgoni në muaj? Bëj që ekipi ynë t'ju rregullojë."]
+      }
+    },
+    {
+      "tag": "locations",
+      "patterns": {
+        "en": ["where are you located", "your address", "nearest branch", "drop off point", "where can i drop my package", "do you have an office", "branch locations", "where is your office", "pickup point near me"],
+        "sq": ["ku ndodheni", "adresa juaj", "dega me e afert", "pike dorezimi", "ku mund ta le pakon", "a keni zyre", "vendndodhjet e degeve", "ku eshte zyra juaj", "pike marrjeje afer meje"]
+      },
+      "responses": {
+        "en": ["We have branches and drop-off points across the country. Tell me your city or area and I'll give you the nearest one and its hours. 📍", "Send me your city/neighborhood and I'll point you to the closest branch or drop-off point."],
+        "sq": ["Kemi degë dhe pika dorëzimi anembanë vendit. Më thoni qytetin ose zonën tuaj dhe ju jap më të afërtën me oraret e saj. 📍", "Më jepni qytetin/lagjen tuaj dhe ju tregoj degën ose pikën e dorëzimit më të afërt."]
       }
     },
     {
       "tag": "contact",
       "patterns": {
-        "en": ["how do i contact you", "contact info", "phone number", "email", "how can i reach you", "talk to a human", "support", "i want to speak to someone", "connect me to an agent"],
-        "sq": ["si mund t'ju kontaktoj", "informacion kontakti", "numri i telefonit", "email", "si mund t'ju arrij", "dua te flas me nje njeri", "me lidh me operator", "suport", "dua nje operator", "flas me dike"]
+        "en": ["how do i contact you", "contact info", "phone number", "email", "how can i reach you", "talk to a human", "support", "i want to speak to someone", "connect me to an agent", "agent", "customer service", "call you", "whatsapp", "operator", "representative"],
+        "sq": ["si mund t'ju kontaktoj", "informacion kontakti", "numri i telefonit", "email", "si mund t'ju arrij", "dua te flas me nje njeri", "me lidh me operator", "suport", "dua nje operator", "flas me dike", "operator", "sherbimi i klientit", "t'ju marr ne telefon", "whatsapp", "perfaqesues"]
       },
       "responses": {
-        "en": ["You can reach our team at support@example.com or +355 00 000 000. I'll flag your message to them too. 📞", "Want me to connect you with the team? Tell me your question and I'll pass it along with your details."],
-        "sq": ["Mund të kontaktoni ekipin tonë në support@example.com ose +355 00 000 000. Do t'ua sinjalizoj edhe mesazhin tuaj. 📞", "Doni t'ju lidh me ekipin? Më thoni pyetjen dhe ua përcjell së bashku me të dhënat tuaja."]
+        "en": ["You can reach our team at support@cargoteer.com or +355 00 000 000 (also on WhatsApp). 📞 I'll flag your message to them too — what should I tell them?", "Want me to connect you with a person? Tell me your question and your tracking/order number and I'll pass it along with your details. You can also call +355 00 000 000."],
+        "sq": ["Mund të kontaktoni ekipin tonë në support@cargoteer.com ose +355 00 000 000 (edhe në WhatsApp). 📞 Do t'ua sinjalizoj edhe mesazhin tuaj — çfarë t'u them?", "Doni t'ju lidh me një person? Më thoni pyetjen dhe numrin e gjurmimit/porosisë dhe ua përcjell me të dhënat tuaja. Mund të telefononi edhe +355 00 000 000."]
       }
     }
   ]
