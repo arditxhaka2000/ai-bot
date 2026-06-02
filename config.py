@@ -22,7 +22,7 @@ PORT = int(os.getenv("PORT", "5000"))
 # Google Gemini — free tier, great Albanian + English. Get a key (no card
 # needed) at https://aistudio.google.com/app/apikey
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 
 # OpenAI — pay-as-you-go (a ChatGPT subscription does NOT include API access).
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
