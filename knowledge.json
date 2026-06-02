@@ -1,86 +1,148 @@
 {
+  "_comment": "Bilingual knowledge base (en = English, sq = Albanian/Shqip). Each intent has patterns and responses per language. The brain detects the user's language and replies in it; if an intent lacks a response in that language it falls back to the other. Edit freely — the brain retrains automatically.",
   "intents": [
     {
       "tag": "greeting",
-      "patterns": [
-        "hi", "hello", "hey", "good morning", "good evening",
-        "what's up", "yo", "howdy", "hey there", "hiya"
-      ],
-      "responses": [
-        "Hey! 👋 How can I help you today?",
-        "Hello! What can I do for you?",
-        "Hi there! Ask me anything."
-      ]
+      "patterns": {
+        "en": ["hi", "hello", "hey", "good morning", "good evening", "what's up", "yo", "howdy", "hey there", "hiya", "good afternoon"],
+        "sq": ["pershendetje", "tungjatjeta", "tung", "ckemi", "c'kemi", "ckemi si je", "hej", "miremengjes", "mirembrema", "miredita", "pershendetje si jeni"]
+      },
+      "responses": {
+        "en": ["Hey! 👋 How can I help you today?", "Hello! What can I do for you?", "Hi there! Ask me anything about your shipments or our services."],
+        "sq": ["Përshëndetje! 👋 Si mund t'ju ndihmoj sot?", "Tungjatjeta! Si mund të ndihmoj?", "Përshëndetje! Më pyetni çfarë të doni për dërgesat ose shërbimet tona."]
+      }
     },
     {
       "tag": "goodbye",
-      "patterns": [
-        "bye", "goodbye", "see you", "see ya", "talk later",
-        "cya", "i'm leaving", "good night", "catch you later"
-      ],
-      "responses": [
-        "See you later! 👋",
-        "Bye! Come back anytime.",
-        "Take care!"
-      ]
+      "patterns": {
+        "en": ["bye", "goodbye", "see you", "see ya", "talk later", "cya", "i'm leaving", "good night", "catch you later"],
+        "sq": ["mirupafshim", "shihemi", "u pafshim", "naten e mire", "diten e mire", "shihemi me vone", "po iki"]
+      },
+      "responses": {
+        "en": ["See you later! 👋", "Bye! Come back anytime.", "Take care!"],
+        "sq": ["Mirupafshim! 👋", "Shihemi! Kthehuni kurdo.", "Ju uroj një ditë të mbarë!"]
+      }
     },
     {
       "tag": "thanks",
-      "patterns": [
-        "thanks", "thank you", "appreciate it", "thx",
-        "thank you so much", "that helps", "cheers"
-      ],
-      "responses": [
-        "You're welcome! 😊",
-        "Anytime!",
-        "Happy to help!"
-      ]
+      "patterns": {
+        "en": ["thanks", "thank you", "appreciate it", "thx", "thank you so much", "that helps", "cheers"],
+        "sq": ["faleminderit", "flm", "te falenderoj", "ju faleminderit", "shume faleminderit", "me ndihmove"]
+      },
+      "responses": {
+        "en": ["You're welcome! 😊", "Anytime!", "Happy to help!"],
+        "sq": ["S'ka përse! 😊", "Me kënaqësi!", "Gjithmonë në shërbimin tuaj!"]
+      }
     },
     {
       "tag": "who_are_you",
-      "patterns": [
-        "who are you", "what are you", "what's your name",
-        "are you a bot", "are you human", "what can you do",
-        "are you a real person", "are you real", "is this a real person",
-        "am i talking to a human"
-      ],
-      "responses": [
-        "I'm an automated assistant here to answer your questions. Ask away!",
-        "I'm a bot — but a helpful one. What do you need?"
-      ]
+      "patterns": {
+        "en": ["who are you", "what are you", "what's your name", "are you a bot", "are you human", "what can you do", "are you a real person", "are you real", "is this a real person", "am i talking to a human"],
+        "sq": ["kush je", "kush jeni", "a je bot", "a je robot", "a je njeri", "a je person real", "po flas me njeri", "cili eshte emri yt", "cfare je", "cfare mund te besh"]
+      },
+      "responses": {
+        "en": ["I'm an automated assistant for our delivery service, here to answer your questions 24/7. Ask away!", "I'm a bot — but a helpful one. I can track shipments, give delivery times, rates and more. What do you need?"],
+        "sq": ["Jam një asistent automatik i shërbimit tonë të dërgesave, këtu për t'ju ndihmuar 24/7. Më pyetni!", "Jam një bot — por ndihmues. Gjurmoj dërgesa, jap kohë dorëzimi, çmime e më shumë. Si mund t'ju shërbej?"]
+      }
     },
     {
       "tag": "hours",
-      "patterns": [
-        "what are your hours", "when are you open", "opening hours",
-        "are you open now", "what time do you close", "business hours"
-      ],
-      "responses": [
-        "We're open Monday to Friday, 9am–6pm. 🕘",
-        "Our hours are 9am to 6pm on weekdays."
-      ]
+      "patterns": {
+        "en": ["what are your hours", "when are you open", "opening hours", "are you open now", "what time do you close", "business hours"],
+        "sq": ["cilat jane oraret", "kur jeni hapur", "orari i punes", "a jeni hapur tani", "deri ne sa jeni hapur", "orari"]
+      },
+      "responses": {
+        "en": ["Our office is open Monday–Friday, 9am–6pm. 🕘 But I'm here 24/7 to help with tracking and questions.", "Office hours are 9am–6pm on weekdays. I never sleep, though — ask me anytime."],
+        "sq": ["Zyra jonë është e hapur nga e hëna në të premte, 09:00–18:00. 🕘 Por unë jam këtu 24/7 për gjurmim e pyetje.", "Oraret e zyrës janë 09:00–18:00 në ditët e javës. Unë s'fle kurrë — më pyetni kurdo."]
+      }
     },
     {
       "tag": "pricing",
-      "patterns": [
-        "how much does it cost", "what's the price", "pricing",
-        "how much", "is it free", "do you charge", "what are your rates"
-      ],
-      "responses": [
-        "Pricing depends on what you need — tell me a bit more and I'll point you in the right direction.",
-        "Happy to help with pricing! What product or service are you asking about?"
-      ]
+      "patterns": {
+        "en": ["how much does it cost", "what's the price", "pricing", "how much", "is it free", "do you charge", "what are your rates", "shipping cost", "how much to ship", "delivery price", "how much is delivery"],
+        "sq": ["sa kushton", "sa kushton dergesa", "cmimi", "sa eshte cmimi", "a eshte falas", "sa paguaj per transport", "tarifat", "sa kushton transporti", "cmimi i dergeses", "sa eshte transporti"]
+      },
+      "responses": {
+        "en": ["Shipping price depends on the destination and the parcel's weight. Tell me where it's going from and to (and roughly how heavy) and I'll point you to a rate. 📦", "Happy to help with pricing! Where is the shipment going from and to?"],
+        "sq": ["Çmimi i transportit varet nga destinacioni dhe pesha e paketës. Më thoni nga ku dhe ku dërgohet (dhe sa peshon afërsisht) dhe ju jap një vlerësim. 📦", "Me kënaqësi ju ndihmoj me çmimet! Nga ku dhe për ku është dërgesa?"]
+      }
+    },
+    {
+      "tag": "tracking",
+      "patterns": {
+        "en": ["where is my order", "track my shipment", "track my package", "shipment status", "tracking", "tracking number", "where is my package", "where is my parcel", "where has my delivery reached", "status of my order", "track order", "i want to track"],
+        "sq": ["ku eshte porosia ime", "gjurmo dergesen", "gjurmim", "statusi i dergeses", "ku eshte paketa ime", "ku eshte porosia", "numri i gjurmimit", "ku ka arritur dergesa", "ku eshte dergesa ime", "dua te gjurmoj", "gjurmo paketen"]
+      },
+      "responses": {
+        "en": ["Sure — send me your tracking number and I'll check the status for you. 📦", "I can help track that. What's your tracking number?"],
+        "sq": ["Sigurisht — më dërgoni numrin tuaj të gjurmimit dhe kontrolloj statusin për ju. 📦", "Mund ta gjurmoj. Cili është numri juaj i gjurmimit?"]
+      }
+    },
+    {
+      "tag": "delivery_time",
+      "patterns": {
+        "en": ["how long does delivery take", "when will my order arrive", "delivery time", "how many days", "how long to deliver", "when does it arrive", "estimated delivery"],
+        "sq": ["sa zgjat dergesa", "per sa kohe vjen porosia", "kur arrin dergesa", "sa dite duhet", "koha e dorezimit", "kur vjen porosia", "sa kohe duhet"]
+      },
+      "responses": {
+        "en": ["Domestic deliveries usually arrive in 1–3 business days. International ones take 5–10 business days. 🚚 Send your tracking number for an exact estimate.", "Most local orders arrive within 1–3 working days. Got a tracking number? I'll give you a precise ETA."],
+        "sq": ["Dërgesat brenda vendit zakonisht arrijnë për 1–3 ditë pune. Ato ndërkombëtare marrin 5–10 ditë pune. 🚚 Dërgoni numrin e gjurmimit për një vlerësim të saktë.", "Shumica e porosive vendore arrijnë brenda 1–3 ditëve të punës. Keni një numër gjurmimi? Ju jap kohën e saktë."]
+      }
+    },
+    {
+      "tag": "coverage",
+      "patterns": {
+        "en": ["where do you ship", "do you ship internationally", "do you deliver to", "which areas do you cover", "do you ship abroad", "do you deliver everywhere", "shipping areas"],
+        "sq": ["ku dergoni", "a dergoni jashte", "a dergoni nderkombetare", "ne cilat zona dergoni", "a dergoni ne kosove", "a dergoni kudo", "zonat e mbulimit", "a mbuloni"]
+      },
+      "responses": {
+        "en": ["We deliver nationwide and internationally. 🌍 Tell me the destination and I'll confirm coverage and time.", "We cover the whole country plus international routes. Where do you need it delivered?"],
+        "sq": ["Dërgojmë në të gjithë vendin dhe ndërkombëtarisht. 🌍 Më thoni destinacionin dhe konfirmoj mbulimin e kohën.", "Mbulojmë të gjithë vendin plus rrugët ndërkombëtare. Ku doni të dorëzohet?"]
+      }
+    },
+    {
+      "tag": "address_change",
+      "patterns": {
+        "en": ["i want to change the address", "change delivery address", "i put the wrong address", "can i change the address", "update my address", "wrong address"],
+        "sq": ["dua te ndryshoj adresen", "ndrysho adresen e dergeses", "kam vendosur adrese gabim", "a mund te ndryshoj adresen", "ndryshim adrese", "adresa eshte gabim", "perditeso adresen"]
+      },
+      "responses": {
+        "en": ["We can change the address as long as the parcel hasn't shipped yet. Send me your tracking number and the new address and I'll pass it to the team. 📍", "Sure — give me the tracking number and the corrected address, and I'll request the change."],
+        "sq": ["Adresën mund ta ndryshojmë nëse dërgesa nuk është nisur ende. Më jepni numrin e gjurmimit dhe adresën e re dhe ua përcjell ekipit. 📍", "Sigurisht — më jepni numrin e gjurmimit dhe adresën e saktë dhe e kërkoj ndryshimin."]
+      }
+    },
+    {
+      "tag": "payment",
+      "patterns": {
+        "en": ["how can i pay", "payment methods", "can i pay cash", "cash on delivery", "do you accept card", "how do i pay", "payment options"],
+        "sq": ["si mund te paguaj", "menyrat e pageses", "a mund te paguaj kesh", "pagese ne dorezim", "a pranoni karte", "si paguaj", "opsionet e pageses", "pagese kesh"]
+      },
+      "responses": {
+        "en": ["We accept cash on delivery, card, and bank transfer. 💳", "You can pay cash on delivery, by card, or by bank transfer — whatever's easiest."],
+        "sq": ["Pranojmë pagesë në dorëzim (kesh), me kartë dhe me transfertë bankare. 💳", "Mund të paguani me para në dorëzim, me kartë ose me transfertë bankare — si t'ju vijë më lehtë."]
+      }
+    },
+    {
+      "tag": "returns",
+      "patterns": {
+        "en": ["i want to return my order", "return policy", "can i return the product", "refund", "money back", "how do i return"],
+        "sq": ["dua te kthej porosine", "politika e kthimit", "a mund te kthej produktin", "rimbursim", "kthim parash", "si te kthej", "kthim porosie"]
+      },
+      "responses": {
+        "en": ["Returns are accepted within 14 days if the item is undamaged. Send me your order number and I'll start the process. ↩️", "We accept returns within 14 days for undamaged items. What's your order number?"],
+        "sq": ["Kthimet pranohen brenda 14 ditësh nëse produkti është i padëmtuar. Më thoni numrin e porosisë dhe e nis procesin. ↩️", "Pranojmë kthime brenda 14 ditësh për produkte të padëmtuara. Cili është numri i porosisë suaj?"]
+      }
     },
     {
       "tag": "contact",
-      "patterns": [
-        "how do i contact you", "contact info", "phone number",
-        "email", "how can i reach you", "talk to a human", "support"
-      ],
-      "responses": [
-        "You can reach a human at support@example.com — I'll make sure they see your message too.",
-        "Want me to connect you with the team? Drop your question and I'll pass it along."
-      ]
+      "patterns": {
+        "en": ["how do i contact you", "contact info", "phone number", "email", "how can i reach you", "talk to a human", "support", "i want to speak to someone", "connect me to an agent"],
+        "sq": ["si mund t'ju kontaktoj", "informacion kontakti", "numri i telefonit", "email", "si mund t'ju arrij", "dua te flas me nje njeri", "me lidh me operator", "suport", "dua nje operator", "flas me dike"]
+      },
+      "responses": {
+        "en": ["You can reach our team at support@example.com or +355 00 000 000. I'll flag your message to them too. 📞", "Want me to connect you with the team? Tell me your question and I'll pass it along with your details."],
+        "sq": ["Mund të kontaktoni ekipin tonë në support@example.com ose +355 00 000 000. Do t'ua sinjalizoj edhe mesazhin tuaj. 📞", "Doni t'ju lidh me ekipin? Më thoni pyetjen dhe ua përcjell së bashku me të dhënat tuaja."]
+      }
     }
   ]
 }

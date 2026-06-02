@@ -1,30 +1,60 @@
 # ai-bot
 
-A Facebook **Messenger** bot in Python with its own **self-contained brain** —
-no Claude, no OpenAI, no paid API. It learns from a knowledge base and reasons
-about messages it has never seen before, so it always replies sensibly even
-when someone goes "out of protocol".
+A Facebook **Messenger** bot in Python with its own **self-contained,
+bilingual brain** — no Claude, no OpenAI, no paid API required. It learns from a
+knowledge base and reasons about messages it has never seen before, so it always
+replies sensibly — and in the customer's own language — even when someone goes
+"out of protocol". (When an OpenAI key *is* set, the smart brain answers first
+and this brain is the free, always-on fallback.)
 
 ## How the brain works
 
-- **Knowledge base** (`knowledge.json`) — example phrases ("intents") and the
-  replies for each. Edit this file to teach the bot about your business.
-- **Intent matching** — every example is turned into a TF-IDF vector
-  (character n-grams, so it shrugs off typos). An incoming message is compared
-  to everything the bot knows; if it's confident, it replies with that intent.
+Four cooperating layers (see `brain.py`):
+
+- **Language detection** — decides whether the customer wrote in **English** or
+  **Albanian** (diacritics like `ë`/`ç` plus marker words) and replies in that
+  language. Language is *sticky* across a conversation, so a bare tracking
+  number sent mid-chat is still answered in the language already in use.
+- **Entity extraction** — spots **tracking numbers** and phone numbers in the
+  raw message. A tracking number is the highest-value thing a logistics
+  customer sends, so it's acknowledged directly even with no other matching
+  words.
+- **Intent matching** — every example phrase becomes two TF-IDF vectors: a
+  *word* signal (content words, accent-folded) and a *character* signal (shrugs
+  off typos like "helo" → "hello"). An incoming message is compared to
+  everything the bot knows; if it's confident, it replies with that intent.
+  Pure pleasantries are demoted when a real question is also present, so
+  "Good evening, when does my order arrive?" answers the question.
 - **Fallback reasoner** — if nothing matches well, the bot inspects the message
-  (is it a question? a complaint? small talk? gibberish?) and crafts a
-  reasonable reply on its own instead of going silent.
-- **Self-improving** — unrecognised messages are logged to
-  `unknown_messages.log`, and you can call `brain.learn(tag, phrase, response)`
-  to add new knowledge at runtime (it retrains instantly).
+  (question? complaint? small talk? gibberish?) and crafts a reasonable,
+  language-matched reply instead of going silent.
+
+**Multi-turn flows** — the brain reports what it expects next (e.g. a tracking
+number after a tracking question); `responder.py` feeds that back so the bot
+runs short conversations offline too.
+
+**Self-improving** — unrecognised messages are logged to
+`unknown_messages.log` (with detected language + confidence), and you can call
+`brain.learn(tag, phrase, response, lang)` to add knowledge at runtime (it
+retrains instantly).
+
+## Tests
+
+```powershell
+python test_brain.py            # quick, no extra deps
+# or: python -m pytest test_brain.py -q
+```
+
+They check behaviour that matters — right intent, right language, typo
+tolerance, entity handling, multi-turn follow-ups, and graceful fallback.
 
 ## Project layout
 
 | File | Purpose |
 |------|---------|
-| `brain.py` | The local AI brain (matching + fallback + learning) |
-| `knowledge.json` | What the bot knows — **edit this to customise it** |
+| `brain.py` | The local AI brain (language + entities + matching + fallback + learning) |
+| `knowledge.json` | What the bot knows, bilingual (en/sq) — **edit this to customise it** |
+| `test_brain.py` | Behavioural tests for the brain |
 | `app.py` | Flask webhook server Facebook talks to |
 | `messenger.py` | Sends replies via the Facebook Send API |
 | `config.py` | Loads settings from `.env` |
@@ -87,9 +117,15 @@ You need a **Facebook Page** and a **Meta developer app**.
 
 ## Customising
 
-- Add your real Q&A to `knowledge.json` (greetings, pricing, hours, FAQs…).
+- Add your real Q&A to `knowledge.json`. Each intent has `patterns` and
+  `responses` per language (`en`, `sq`) — add phrases in either, and add new
+  languages by adding a key. The bot replies in the customer's detected
+  language and falls back to English if an intent lacks one.
 - Tune `CONFIDENCE_THRESHOLD` in `brain.py` (lower = looser matching).
-- Edit the fallback replies in `brain.py` to match your bot's voice.
+- Edit the language-aware fallback/system replies in `brain.py`
+  (`SYSTEM_MESSAGES`) to match your bot's voice, and the `SQ_MARKERS` /
+  `EN_MARKERS` sets if you want to tune language detection.
+- Run `python test_brain.py` after changes to confirm nothing regressed.
 
 ## Hosting it live for free (Render)
 
