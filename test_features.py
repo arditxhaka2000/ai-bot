@@ -104,8 +104,8 @@ def test_history_persists():
 def test_state_language_is_sticky():
     u = "t_state"
     responder.reset(u)
-    responder.respond(u, "sa eshte tarifa")  # Albanian pricing question
-    assert store.get_state(u)["lang"] == "sq"
+    responder.respond(u, "сколько вы берёте")  # Russian pricing question
+    assert store.get_state(u)["lang"] == "ru"
 
 
 def test_lead_captured_for_get_started():

@@ -48,7 +48,7 @@ KNOWLEDGE_PATH = os.path.join(HERE, "knowledge.json")
 UNKNOWN_LOG = os.path.join(HERE, "unknown_messages.log")
 
 DEFAULT_LANG = "en"
-SUPPORTED_LANGS = ("en", "sq")
+SUPPORTED_LANGS = ("en", "es", "ru")
 
 # Accept an intent when the best phrase clears this bar. Char + word signals
 # are blended, so a clean hit lands well above it and noise well below.
@@ -57,36 +57,38 @@ CONFIDENCE_THRESHOLD = 0.45
 
 # --- language resources -------------------------------------------------------
 
-# Marker words, accent-folded. Presence of these tips language detection. Kept
-# deliberately small and high-signal; the diacritics check carries the rest.
-SQ_MARKERS = {
-    "pershendetje", "tungjatjeta", "tung", "ckemi", "miremengjes", "mirembrema",
-    "miredita", "mirupafshim", "shihemi", "naten", "faleminderit", "flm",
-    "sa", "kushton", "cmimi", "cmim", "ku", "eshte", "porosia", "porosi",
-    "dergesa", "dergese", "dergesen", "dergoni", "paketa", "paketen", "gjurmo",
-    "gjurmim", "gjurmimit", "statusi", "dua", "te", "kam", "jam", "je", "jeni",
-    "mire", "po", "jo", "lutem", "ndihmo", "adresen", "adrese", "pagese",
-    "paguaj", "kthej", "kthim", "oraret", "orari", "hapur", "numri", "telefonit",
-    "vjen", "arrin", "dite", "kohe", "falas", "tani", "njeri", "robot", "bot",
-    "cfare", "kush", "cili", "zona", "jashte", "kosove", "nderkombetare",
+# Marker words, accent-folded. Presence of these tips language detection between
+# English and Spanish. Russian is detected by its Cyrillic script (below).
+ES_MARKERS = {
+    "hola", "buenos", "buenas", "dias", "tardes", "noches", "gracias", "adios",
+    "cuanto", "cuesta", "precio", "tarifa", "cobran", "cobras", "como",
+    "funciona", "quien", "eres", "sois", "persona", "operador", "agente",
+    "representante", "camion", "camionero", "carga", "cargas", "ruta", "rutas",
+    "equipo", "remolque", "seco", "quiero", "empezar", "registrarme", "ayuda",
+    "servicios", "ofrecen", "hablar", "contacto", "telefono", "correo",
+    "porcentaje", "despacho", "despachador", "necesito", "tengo", "puedo",
+    "puedes", "donde", "que", "para", "mio", "estoy", "pagando",
 }
 EN_MARKERS = {
     "the", "you", "your", "are", "is", "am", "how", "what", "when", "where",
     "why", "can", "do", "does", "will", "hello", "hi", "hey", "thanks", "thank",
-    "bye", "price", "cost", "much", "ship", "shipping", "delivery", "deliver",
-    "track", "tracking", "order", "package", "parcel", "hours", "open",
-    "contact", "help", "return", "refund", "pay", "payment", "address",
-    "change", "free", "human", "person", "bot",
+    "bye", "price", "cost", "much", "charge", "rate", "dispatch", "dispatcher",
+    "load", "loads", "lane", "lanes", "truck", "broker", "rates", "percent",
+    "contact", "help", "pay", "fee", "human", "person", "started", "quote",
 }
-# Words claimed by both lists ("po", "bot", …) shouldn't sway the vote.
-_AMBIGUOUS = SQ_MARKERS & EN_MARKERS
-SQ_ONLY = SQ_MARKERS - _AMBIGUOUS
+# Words claimed by both lists shouldn't sway the vote.
+_AMBIGUOUS = ES_MARKERS & EN_MARKERS
+ES_ONLY = ES_MARKERS - _AMBIGUOUS
 EN_ONLY = EN_MARKERS - _AMBIGUOUS
+
+_CYRILLIC_RE = re.compile(r"[а-яё]")
+_SPANISH_CHARS = ("ñ", "¿", "¡", "á", "é", "í", "ó", "ú", "ü")
 
 
 def fold(text):
-    """Lowercase and strip diacritics so 'Përshëndetje' == 'pershendetje' and
-    'helló' == 'hello'. Matching and language detection both run on this."""
+    """Lowercase and strip diacritics so 'cuánto' == 'cuanto' and 'helló' ==
+    'hello'. Cyrillic is left intact. Matching and (Latin) language detection
+    both run on this."""
     text = (text or "").lower()
     decomposed = unicodedata.normalize("NFKD", text)
     return "".join(c for c in decomposed if not unicodedata.combining(c))
@@ -97,24 +99,26 @@ def _tokens(folded_text):
 
 
 def detect_language(text, fallback=DEFAULT_LANG):
-    """Return 'sq' or 'en'. Albanian diacritics are a strong tell; otherwise we
-    count marker words. When there's no signal either way (e.g. a bare tracking
-    number), return `fallback` — callers pass the conversation's language so a
-    number sent mid-chat is answered in the language already in use."""
+    """Return 'en', 'es', or 'ru'. Cyrillic script is a hard tell for Russian;
+    otherwise we weigh Spanish vs English marker words (plus Spanish-only
+    characters). When there's no signal either way, return `fallback` — callers
+    pass the conversation's language so a signal-less reply stays consistent."""
     raw_low = (text or "").lower()
+
+    # Any Cyrillic -> Russian (strong, unambiguous signal).
+    if _CYRILLIC_RE.search(raw_low):
+        return "ru"
+
     folded = fold(raw_low)
     toks = set(_tokens(folded))
-
-    sq_score = len(toks & SQ_ONLY)
+    es_score = len(toks & ES_ONLY)
     en_score = len(toks & EN_ONLY)
+    if any(ch in raw_low for ch in _SPANISH_CHARS):
+        es_score += 2
 
-    # ë / ç are unambiguously Albanian in this customer base.
-    if "ë" in raw_low or "ç" in raw_low:
-        sq_score += 2
-
-    if sq_score > en_score:
-        return "sq"
-    if en_score > sq_score:
+    if es_score > en_score:
+        return "es"
+    if en_score > es_score:
         return "en"
     return fallback if fallback in SUPPORTED_LANGS else DEFAULT_LANG
 
@@ -334,47 +338,53 @@ class Brain:
     # ---- fallback reasoner (handles "out of protocol" messages) --------------
 
     FRUSTRATION_WORDS = {
-        # Note: damage/loss words ("broken", "damaged", "lost", "prishur") are
-        # deliberately NOT here — the dedicated `damaged_lost` intent handles
-        # those with a better claim flow (asks for a photo, opens a claim).
         "en": (
             "angry", "annoyed", "useless", "stupid", "worst", "hate",
             "terrible", "awful", "rubbish", "garbage", "complaint", "sucks",
             "ridiculous", "scam", "fed up", "unacceptable", "disappointed",
             "still waiting", "where is my money", "no one helps",
         ),
-        "sq": (
-            "i zemeruar", "e zemeruar", "nervozuar", "tmerzitur", "keq",
-            "i keq", "e keqe", "ankese", "qesharake", "mashtrim", "turp",
-            "skandal", "e papranueshme", "i zhgenjyer", "e zhgenjyer",
-            "ende pres", "po pres prej kohesh", "ku jane parate e mia",
-            "askush nuk ndihmon",
+        "es": (
+            "enojado", "enfadado", "molesto", "inutil", "basura", "terrible",
+            "horrible", "queja", "estafa", "ridiculo", "harto", "decepcionado",
+            "inaceptable", "no sirve", "pesimo", "todavia espero",
+            "donde esta mi dinero", "nadie ayuda",
+        ),
+        "ru": (
+            "зол", "злой", "раздражен", "бесполезно", "ужас", "ужасно",
+            "отстой", "жалоба", "развод", "обман", "смешно", "надоело",
+            "разочарован", "неприемлемо", "не работает", "до сих пор жду",
+            "где мои деньги", "никто не помогает",
         ),
     }
 
     def _is_frustrated(self, text):
         folded = fold(text)
-        for lang in SUPPORTED_LANGS:
-            if any(w in folded for w in self.FRUSTRATION_WORDS[lang]):
+        low = (text or "").lower()
+        for w in self.FRUSTRATION_WORDS["en"] + self.FRUSTRATION_WORDS["es"]:
+            if w in folded:
                 return True
-        return False
+        return any(w in low for w in self.FRUSTRATION_WORDS["ru"])
 
     QUESTION_STARTERS = re.compile(
         r"^(who|what|when|where|why|how|can|do|does|is|are|will|should|could"   # en
-        r"|kush|cfare|cili|cila|kur|ku|pse|si|sa|a)\b"                          # sq
+        r"|que|quien|cuando|donde|por que|porque|como|cuanto|cual|puede|puedo"  # es
+        r"|что|кто|когда|где|почему|как|сколько|какой|можно|вы)\b"             # ru
     )
 
     def _fallback(self, text, lang):
         folded = fold(text)
+        low = (text or "").lower()
 
-        if "?" in text or self.QUESTION_STARTERS.match(folded):
+        if "?" in text or self.QUESTION_STARTERS.match(folded) \
+                or self.QUESTION_STARTERS.match(low):
             return self._say("fallback_question", lang)
 
         if folded.strip() in ("ok", "okay", "k", "cool", "nice", "sure", "yes",
-                               "no", "po", "jo", "mire", "dakord"):
+                               "no", "si", "vale", "bien", "da", "net"):
             return self._say("fallback_ack", lang)
 
-        if len(text) <= 2 or not re.search(r"[a-zA-Zëçáéíóú]", text):
+        if len(text) <= 2 or not re.search(r"[a-zA-ZáéíóúñЀ-ӿ]", text):
             return self._say("fallback_short", lang)
 
         return self._say("fallback_generic", lang)
@@ -384,41 +394,54 @@ class Brain:
     SYSTEM_MESSAGES = {
         "empty": {
             "en": ["Did you mean to send something? I didn't catch that. 🙂"],
-            "sq": ["A deshët të dërgoni diçka? Nuk e kapa. 🙂"],
+            "es": ["¿Querías enviar algo? No lo capté. 🙂"],
+            "ru": ["Вы хотели что-то отправить? Я не разобрал. 🙂"],
         },
         "frustrated": {
             "en": ["I'm sorry — that's frustrating, and I want to make it right. 🙏 "
                    "Tell me what's going on and I'll jump on it or get a teammate to "
                    "help you directly."],
-            "sq": ["Më vjen keq — kjo është e bezdisshme dhe dua ta rregulloj. 🙏 "
-                   "Më thoni çfarë po ndodh dhe e marr përsipër ose sjell një koleg "
-                   "që t'ju ndihmojë drejtpërdrejt."],
+            "es": ["Lo siento — entiendo la frustración y quiero solucionarlo. 🙏 "
+                   "Cuéntame qué pasa y me encargo, o te paso con un compañero del "
+                   "equipo para ayudarte directamente."],
+            "ru": ["Извините — понимаю, это неприятно, и я хочу всё исправить. 🙏 "
+                   "Расскажите, что случилось, я займусь этим или передам коллеге, "
+                   "чтобы помочь напрямую."],
         },
         "fallback_question": {
             "en": ["Good question — let me get you a precise answer. Mind if a teammate "
                    "follows up, or can you tell me a bit more about your operation?",
                    "I want to get that exactly right for you. Can you share your "
                    "equipment and lanes so I can help, or should a teammate reach out?"],
-            "sq": ["Pyetje e mirë — t'ju jap një përgjigje të saktë. Mund t'ju kontaktojë "
-                   "një koleg, apo më tregoni pak më shumë për operacionin tuaj?",
-                   "Dua t' jua jap saktë. Mund të më thoni automjetin dhe rrugët, apo "
-                   "preferoni t'ju kontaktojë një koleg?"],
+            "es": ["Buena pregunta — quiero darte una respuesta exacta. ¿Te parece si un "
+                   "compañero te contacta, o me cuentas un poco más sobre tu operación?",
+                   "Quiero darte la respuesta correcta. ¿Me dices tu equipo y tus rutas "
+                   "para ayudarte, o prefieres que te contacte un compañero?"],
+            "ru": ["Хороший вопрос — хочу дать точный ответ. Может, коллега свяжется с "
+                   "вами, или расскажете чуть больше о вашей работе?",
+                   "Хочу ответить точно. Подскажите ваш тип прицепа и маршруты, или "
+                   "пусть с вами свяжется коллега?"],
         },
         "fallback_ack": {
             "en": ["👍 Got it. Anything else I can help with?"],
-            "sq": ["👍 U mor vesh. Diçka tjetër ku mund të ndihmoj?"],
+            "es": ["👍 Entendido. ¿Algo más en que pueda ayudarte?"],
+            "ru": ["👍 Понял. Чем ещё могу помочь?"],
         },
         "fallback_short": {
             "en": ["I'm here! What can I help you with?"],
-            "sq": ["Jam këtu! Si mund t'ju ndihmoj?"],
+            "es": ["¡Aquí estoy! ¿En qué puedo ayudarte?"],
+            "ru": ["Я на связи! Чем могу помочь?"],
         },
         "fallback_generic": {
             "en": ["Hmm, I'm not sure I fully got that. Could you tell me a bit more so I can help?",
                    "I want to make sure I help correctly — can you rephrase that or add a little detail?",
                    "I didn't quite understand, but I'm listening. What are you trying to do?"],
-            "sq": ["Hmm, nuk jam i sigurt se e kuptova plotësisht. Mund të më thoni pak më shumë që t'ju ndihmoj?",
-                   "Dua të sigurohem që ju ndihmoj saktë — mund ta riformuloni ose të shtoni pak detaje?",
-                   "Nuk e kuptova mirë, por po ju dëgjoj. Çfarë doni të bëni?"],
+            "es": ["Mmm, no estoy seguro de haberlo entendido del todo. ¿Me cuentas un poco más para ayudarte?",
+                   "Quiero ayudarte bien — ¿puedes reformularlo o dar algún detalle más?",
+                   "No lo entendí del todo, pero te escucho. ¿Qué necesitas hacer?"],
+            "ru": ["Хм, не уверен, что понял до конца. Расскажите чуть подробнее, чтобы я помог?",
+                   "Хочу помочь правильно — можете переформулировать или добавить детали?",
+                   "Не совсем понял, но слушаю вас. Что вы хотите сделать?"],
         },
     }
 

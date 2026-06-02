@@ -1,202 +1,238 @@
 {
-  "_comment": "Bilingual knowledge base for Cargoteer — a TRUCK DISPATCH service for owner-operators & small fleets (load sourcing, rate negotiation, broker communication, route planning, paperwork). en = English, sq = Albanian. The agent presents as a human dispatch representative (never as a bot). Pricing: be competitive, ask the carrier's current rate, offer a customized quote from the team — never promise a specific discount. The LLM brain is grounded on these facts; this also powers the offline fallback. Edit freely; the brain retrains automatically.",
+  "_comment": "Trilingual knowledge base for Cargoteer — a TRUCK DISPATCH service for owner-operators & small fleets. en = English, es = Spanish, ru = Russian. The agent presents as a human dispatch representative (never a bot). Pricing: be competitive, ask the carrier's current rate, offer a customized quote from the team — never promise a specific discount. The LLM brain is grounded on these facts; this also powers the offline fallback. Edit freely; the brain retrains automatically.",
   "intents": [
     {
       "tag": "greeting",
       "patterns": {
-        "en": ["hi", "hello", "hey", "good morning", "good evening", "good afternoon", "what's up", "yo", "hey there", "hello there", "hi there", "morning", "howdy"],
-        "sq": ["pershendetje", "tungjatjeta", "tung", "ckemi", "hej", "miremengjes", "mirembrema", "miredita", "si je", "si jeni"]
+        "en": ["hi", "hello", "hey", "good morning", "good evening", "what's up", "yo", "hey there", "hi there", "howdy"],
+        "es": ["hola", "buenas", "buenos dias", "buenas tardes", "buenas noches", "que tal", "como estas", "hola que tal", "saludos"],
+        "ru": ["привет", "здравствуйте", "здравствуй", "добрый день", "доброе утро", "добрый вечер", "здаров", "приветствую", "хай"]
       },
       "responses": {
         "en": ["Hey! 👋 Thanks for reaching out to Cargoteer. How can I help — are you looking for dispatch support?", "Hi there! 👋 This is Cargoteer dispatch. What can I do for you today?"],
-        "sq": ["Tungjatjeta! 👋 Faleminderit që na shkruat te Cargoteer. Si mund t'ju ndihmoj — po kërkoni shërbim dispeçimi?", "Përshëndetje! 👋 Cargoteer dispeçim këtu. Si mund t'ju ndihmoj sot?"]
+        "es": ["¡Hola! 👋 Gracias por contactar a Cargoteer. ¿En qué te ayudo — buscas servicio de despacho?", "¡Hola! 👋 Aquí Cargoteer despacho. ¿Qué necesitas hoy?"],
+        "ru": ["Здравствуйте! 👋 Спасибо, что написали в Cargoteer. Чем помочь — ищете диспетчера?", "Привет! 👋 Это диспетчерская Cargoteer. Чем могу помочь сегодня?"]
       }
     },
     {
       "tag": "goodbye",
       "patterns": {
-        "en": ["bye", "goodbye", "see you", "talk later", "that's all", "i'm good", "nothing else", "thanks bye"],
-        "sq": ["mirupafshim", "shihemi", "naten e mire", "diten e mire", "kaq", "asgje tjeter", "po iki"]
+        "en": ["bye", "goodbye", "see you", "talk later", "that's all", "i'm good", "thanks bye"],
+        "es": ["adios", "chao", "hasta luego", "nos vemos", "eso es todo", "estoy bien", "gracias adios"],
+        "ru": ["пока", "до свидания", "до встречи", "увидимся", "это всё", "всё хорошо", "спасибо пока"]
       },
       "responses": {
         "en": ["Sounds good — reach out anytime you need loads covered. Drive safe! 🚛", "Anytime! We're here whenever you're ready to roll. Take care!"],
-        "sq": ["Në rregull — na shkruani sa herë t'ju duhen ngarkesa. Rrugë të mbarë! 🚛", "Kurdoherë! Jemi këtu kur të jeni gati. Kujdes!"]
+        "es": ["¡Perfecto — escríbenos cuando necesites cargas! Maneja con cuidado. 🚛", "¡Cuando quieras! Aquí estamos cuando estés listo para rodar. ¡Cuídate!"],
+        "ru": ["Отлично — пишите, когда понадобятся грузы. Счастливого пути! 🚛", "В любое время! Мы на связи, когда будете готовы выезжать. Берегите себя!"]
       }
     },
     {
       "tag": "thanks",
       "patterns": {
-        "en": ["thanks", "thank you", "appreciate it", "thx", "thank you so much", "that helps", "ty"],
-        "sq": ["faleminderit", "flm", "te falenderoj", "ju faleminderit", "shume faleminderit", "me ndihmove"]
+        "en": ["thanks", "thank you", "appreciate it", "thx", "thank you so much", "that helps"],
+        "es": ["gracias", "muchas gracias", "te lo agradezco", "mil gracias", "eso ayuda", "agradecido"],
+        "ru": ["спасибо", "благодарю", "спс", "большое спасибо", "это помогает", "признателен"]
       },
       "responses": {
         "en": ["You got it! 💪 Anything else I can help with?", "Happy to help — that's what we're here for."],
-        "sq": ["S'ka përse! 💪 Diçka tjetër ku mund të ndihmoj?", "Me kënaqësi — për këtë jemi këtu."]
+        "es": ["¡A la orden! 💪 ¿Algo más en que pueda ayudarte?", "Con gusto — para eso estamos."],
+        "ru": ["Обращайтесь! 💪 Чем ещё могу помочь?", "Рад помочь — для этого мы и здесь."]
       }
     },
     {
       "tag": "compliment",
       "patterns": {
-        "en": ["great service", "you're awesome", "you guys are great", "best dispatch", "well done", "very helpful", "good job", "love working with you"],
-        "sq": ["sherbim i shkelqyer", "jeni te mrekullueshem", "punoni shkelqyeshem", "shume te dobishem", "bravo", "kenaqesi te punoj me ju"]
+        "en": ["great service", "you're awesome", "you guys are great", "best dispatch", "very helpful", "good job"],
+        "es": ["excelente servicio", "son geniales", "el mejor despacho", "muy util", "buen trabajo", "son los mejores"],
+        "ru": ["отличный сервис", "вы молодцы", "лучший диспетчер", "очень помогли", "хорошая работа", "вы супер"]
       },
       "responses": {
         "en": ["Really appreciate that! 🙌 We're committed to keeping your truck moving and profitable.", "Thank you — means a lot. We've got your back out there."],
-        "sq": ["E vlerësoj shumë! 🙌 Jemi të përkushtuar ta mbajmë kamionin tuaj në punë e fitimprurës.", "Faleminderit — ka shumë vlerë. Jemi me ju në rrugë."]
+        "es": ["¡Mil gracias! 🙌 Estamos comprometidos a mantener tu camión rodando y rentable.", "Gracias — significa mucho. Te cuidamos en la carretera."],
+        "ru": ["Спасибо большое! 🙌 Мы делаем всё, чтобы ваш грузовик работал и приносил прибыль.", "Благодарю — это важно для нас. Мы всегда вас поддержим в рейсе."]
       }
     },
     {
       "tag": "who_are_you",
       "patterns": {
-        "en": ["who are you", "what's your name", "who am i talking to", "are you a real person", "is this a person", "who is this", "what is your role"],
-        "sq": ["kush je", "kush jeni", "cili eshte emri yt", "me ke kend po flas", "a je person real", "kush eshte ky", "cili eshte roli yt"]
+        "en": ["who are you", "what's your name", "who am i talking to", "are you a real person", "is this a person", "who is this"],
+        "es": ["quien eres", "como te llamas", "con quien hablo", "eres una persona real", "es una persona", "quien es"],
+        "ru": ["кто вы", "как вас зовут", "с кем я говорю", "вы реальный человек", "это человек", "кто это"]
       },
       "responses": {
         "en": ["I'm with the Cargoteer dispatch team — here to help you find loads, negotiate rates, and get set up. What are you hauling these days?", "I'm part of the dispatch crew here at Cargoteer. Happy to help with loads, rates, or getting started — what do you need?"],
-        "sq": ["Jam pjesë e ekipit të dispeçimit te Cargoteer — këtu për t'ju gjetur ngarkesa, negociuar çmime dhe për t'ju regjistruar. Çfarë po transportoni këto kohë?", "Jam nga ekipi i dispeçimit te Cargoteer. Me kënaqësi ju ndihmoj me ngarkesa, çmime ose për të filluar — çfarë ju nevojitet?"]
+        "es": ["Soy del equipo de despacho de Cargoteer — aquí para ayudarte a encontrar cargas, negociar tarifas y empezar. ¿Qué estás moviendo últimamente?", "Soy parte del equipo de despacho de Cargoteer. Con gusto te ayudo con cargas, tarifas o para empezar — ¿qué necesitas?"],
+        "ru": ["Я из диспетчерской команды Cargoteer — помогу найти грузы, договориться о ставках и начать работу. Что возите в последнее время?", "Я из команды диспетчеров Cargoteer. С радостью помогу с грузами, ставками или началом работы — что вам нужно?"]
       }
     },
     {
       "tag": "about_company",
       "patterns": {
-        "en": ["tell me about cargoteer", "what is cargoteer", "about your company", "what do you do", "more info", "tell me more", "what kind of company", "who is cargoteer"],
-        "sq": ["tregomi per cargoteer", "cfare eshte cargoteer", "per kompanine tuaj", "cfare beni", "me shume info", "tregomi me shume", "cfare lloj kompanie", "kush eshte cargoteer"]
+        "en": ["tell me about cargoteer", "what is cargoteer", "about your company", "what do you do", "tell me more", "who is cargoteer"],
+        "es": ["hablame de cargoteer", "que es cargoteer", "sobre tu empresa", "que hacen", "cuentame mas", "quien es cargoteer"],
+        "ru": ["расскажите о cargoteer", "что такое cargoteer", "о вашей компании", "чем вы занимаетесь", "расскажите подробнее", "кто такие cargoteer"]
       },
       "responses": {
         "en": ["Cargoteer is a truck dispatching service for owner-operators and small fleets. We handle the back office — finding loads, negotiating rates, dealing with brokers, planning routes, and paperwork — so you can focus on driving and earning. Want to hear how we'd help your operation?", "We're a dispatch company that keeps your truck loaded and profitable: load sourcing, rate negotiation, broker communication, route planning, and paperwork. Are you an owner-operator or running a small fleet?"],
-        "sq": ["Cargoteer është një shërbim dispeçimi për pronarë-operatorë dhe flota të vogla. Ne merremi me pjesën administrative — gjetjen e ngarkesave, negocimin e çmimeve, komunikimin me broker, planifikimin e rrugëve dhe dokumentet — që ju të fokusoheni te vozitja dhe fitimi. Doni të dëgjoni si do t'ju ndihmonim?", "Jemi një kompani dispeçimi që e mban kamionin tuaj të ngarkuar e fitimprurës: gjetje ngarkesash, negocim çmimesh, komunikim me broker, planifikim rrugësh dhe dokumente. Jeni pronar-operator apo keni një flotë të vogël?"]
+        "es": ["Cargoteer es un servicio de despacho para operadores-propietarios y flotas pequeñas. Nos encargamos de la parte administrativa — buscar cargas, negociar tarifas, tratar con brokers, planear rutas y el papeleo — para que tú te concentres en manejar y ganar. ¿Te cuento cómo ayudaríamos a tu operación?", "Somos una empresa de despacho que mantiene tu camión cargado y rentable: búsqueda de cargas, negociación de tarifas, comunicación con brokers, planeación de rutas y papeleo. ¿Eres operador-propietario o manejas una flota pequeña?"],
+        "ru": ["Cargoteer — это диспетчерская служба для водителей-собственников и небольших автопарков. Мы берём на себя всю бумажную работу — поиск грузов, переговоры по ставкам, общение с брокерами, построение маршрутов и документы — чтобы вы сосредоточились на рейсах и заработке. Рассказать, чем поможем именно вам?", "Мы диспетчерская компания, которая держит ваш грузовик загруженным и прибыльным: поиск грузов, переговоры по ставкам, работа с брокерами, маршруты и документы. Вы водитель-собственник или у вас небольшой автопарк?"]
       }
     },
     {
       "tag": "services",
       "patterns": {
-        "en": ["what services do you offer", "what do you offer", "what can you do for me", "list of services", "what services", "how can you help", "what's included", "what do i get"],
-        "sq": ["cfare sherbimesh ofroni", "cfare ofroni", "cfare mund te beni per mua", "cilat sherbime", "si mund te ndihmoni", "cfare perfshihet", "cfare perfitoj"]
+        "en": ["what services do you offer", "what do you offer", "what can you do for me", "what services", "how can you help", "what's included"],
+        "es": ["que servicios ofrecen", "que ofrecen", "que pueden hacer por mi", "que servicios", "como pueden ayudarme", "que incluye"],
+        "ru": ["какие услуги вы предлагаете", "что вы предлагаете", "что вы можете для меня", "какие услуги", "чем вы можете помочь", "что входит"]
       },
       "responses": {
         "en": ["Full dispatch support so you can just drive:\n• Load sourcing (best-paying freight)\n• Rate negotiation with brokers\n• Broker communication & setup\n• Route planning to cut deadhead\n• Paperwork & rate cons\nWant a customized quote for your equipment and lanes?", "We cover the whole back office: finding loads, negotiating rates, talking to brokers, planning routes, and handling paperwork — built for owner-operators and small fleets. What do you run?"],
-        "sq": ["Mbështetje e plotë dispeçimi që ju vetëm të vozisni:\n• Gjetje ngarkesash (më të paguarat)\n• Negocim çmimesh me broker\n• Komunikim e regjistrim me broker\n• Planifikim rrugësh për më pak kilometra bosh\n• Dokumente & rate con\nDoni një ofertë të personalizuar për automjetin dhe rrugët tuaja?", "Mbulojmë gjithë pjesën administrative: gjetje ngarkesash, negocim çmimesh, komunikim me broker, planifikim rrugësh dhe dokumente — për pronarë-operatorë dhe flota të vogla. Çfarë drejtoni?"]
+        "es": ["Despacho completo para que tú solo manejes:\n• Búsqueda de cargas (las mejor pagadas)\n• Negociación de tarifas con brokers\n• Comunicación y alta con brokers\n• Planeación de rutas para reducir millas vacías\n• Papeleo y rate cons\n¿Quieres una cotización personalizada para tu equipo y rutas?", "Cubrimos toda la parte administrativa: buscar cargas, negociar tarifas, hablar con brokers, planear rutas y manejar el papeleo — para operadores-propietarios y flotas pequeñas. ¿Qué manejas?"],
+        "ru": ["Полное диспетчерское сопровождение, чтобы вы только водили:\n• Поиск грузов (самые выгодные)\n• Переговоры по ставкам с брокерами\n• Общение и оформление с брокерами\n• Построение маршрутов, меньше холостого пробега\n• Документы и рейт-коны\nХотите индивидуальный расчёт под ваш прицеп и маршруты?", "Берём на себя всю офисную работу: поиск грузов, переговоры по ставкам, общение с брокерами, маршруты и документы — для водителей-собственников и небольших автопарков. На чём работаете?"]
       }
     },
     {
       "tag": "how_it_works",
       "patterns": {
-        "en": ["how does it work", "how do you work", "how does dispatch work", "how do i start", "what's the process", "how do we get going", "what happens after i sign up", "onboarding"],
-        "sq": ["si funksionon", "si punoni", "si funksionon dispeçimi", "si te filloj", "cili eshte procesi", "si fillojme", "cfare ndodh pasi regjistrohem", "procesi i fillimit"]
+        "en": ["how does it work", "how do you work", "how does dispatch work", "how do i start", "what's the process", "what happens after i sign up"],
+        "es": ["como funciona", "como trabajan", "como funciona el despacho", "como empiezo", "cual es el proceso", "que pasa despues de registrarme"],
+        "ru": ["как это работает", "как вы работаете", "как работает диспетчер", "как начать", "какой процесс", "что после регистрации"]
       },
       "responses": {
         "en": ["Simple: 1) We get a quick setup (your authority/MC, insurance, equipment, preferred lanes), 2) we find and book loads that pay, 3) we negotiate and send you the rate con, 4) you drive, we handle brokers and paperwork. Want to get set up?", "We onboard you fast — share your equipment and the lanes you like, and we start sourcing loads and negotiating rates for you right away. Ready to start?"],
-        "sq": ["E thjeshtë: 1) Bëjmë një regjistrim të shpejtë (autoriteti/MC, sigurimi, automjeti, rrugët e preferuara), 2) gjejmë e rezervojmë ngarkesa që paguajnë, 3) negociojmë dhe ju dërgojmë rate con, 4) ju vozisni, ne merremi me broker e dokumente. Doni t'ju regjistrojmë?", "Ju regjistrojmë shpejt — na thoni automjetin dhe rrugët që preferoni, dhe nisim menjëherë të gjejmë ngarkesa e të negociojmë çmime. Gati të fillojmë?"]
+        "es": ["Sencillo: 1) Hacemos un alta rápida (tu authority/MC, seguro, equipo, rutas preferidas), 2) buscamos y reservamos cargas que pagan bien, 3) negociamos y te enviamos el rate con, 4) tú manejas, nosotros vemos brokers y papeleo. ¿Te damos de alta?", "El alta es rápida — dime tu equipo y las rutas que te gustan y empezamos a buscar cargas y negociar tarifas de inmediato. ¿Listo para empezar?"],
+        "ru": ["Просто: 1) быстрое оформление (ваш authority/MC, страховка, прицеп, любимые маршруты), 2) находим и бронируем выгодные грузы, 3) договариваемся и присылаем рейт-кон, 4) вы за рулём, мы — брокеры и документы. Оформляемся?", "Подключаем быстро — скажите ваш прицеп и предпочитаемые маршруты, и мы сразу начинаем искать грузы и договариваться о ставках. Готовы начать?"]
       }
     },
     {
       "tag": "pricing",
       "patterns": {
-        "en": ["how much do you charge", "what's your rate", "pricing", "what percentage", "what's your fee", "how much is dispatch", "what do you charge", "dispatch fee", "cost", "your rates", "is there a contract"],
-        "sq": ["sa merrni", "sa eshte tarifa", "cmimi", "sa perqind", "sa eshte komisioni", "sa kushton dispeçimi", "tarifa e dispeçimit", "kosto", "cmimet tuaja", "a ka kontrate"]
+        "en": ["how much do you charge", "what's your rate", "pricing", "what percentage", "what's your fee", "how much is dispatch", "dispatch fee", "your rates", "is there a contract"],
+        "es": ["cuanto cobran", "cual es su tarifa", "precio", "que porcentaje", "cual es su comision", "cuanto cuesta el despacho", "tarifa de despacho", "sus tarifas", "hay contrato"],
+        "ru": ["сколько вы берёте", "какая у вас ставка", "цена", "какой процент", "какая комиссия", "сколько стоит диспетчер", "тариф диспетчера", "ваши расценки", "есть ли контракт"]
       },
       "responses": {
         "en": ["We keep our dispatch rates highly competitive while giving you full support, and in many cases we can match or beat what you're paying now. Mind sharing the rate you've been quoted, plus your equipment and main lanes? I'll get you a customized quote.", "Our goal is to help you keep more of what you earn, so our pricing stays competitive. What rate are you on today, and what do you run? I'll put together a quote that fits your operation."],
-        "sq": ["I mbajmë tarifat tona shumë konkurruese duke ju dhënë mbështetje të plotë, dhe shpesh mund të barazojmë ose të bëjmë më mirë se sa paguani tani. Mund të na thoni çmimin që ju kanë ofruar, plus automjetin dhe rrugët kryesore? Ju bëj një ofertë të personalizuar.", "Synimi ynë është t'ju ndihmojmë të mbani më shumë nga sa fitoni, prandaj çmimi ynë mbetet konkurrues. Në çfarë tarife jeni sot dhe çfarë drejtoni? Ju përgatis një ofertë sipas operacionit tuaj."]
+        "es": ["Mantenemos nuestras tarifas muy competitivas y con soporte completo; en muchos casos podemos igualar o mejorar lo que pagas hoy. ¿Me dices la tarifa que te han ofrecido, más tu equipo y tus rutas principales? Te preparo una cotización personalizada.", "Nuestra meta es que te quedes con más de lo que ganas, por eso somos competitivos. ¿Qué tarifa pagas hoy y qué manejas? Te armo una cotización a la medida de tu operación."],
+        "ru": ["Мы держим ставки диспетчера очень конкурентными при полном сопровождении, и часто можем повторить или улучшить то, что вы платите сейчас. Подскажите, какую ставку вам предлагали, а также ваш прицеп и основные маршруты? Подготовлю индивидуальный расчёт.", "Наша цель — чтобы вы оставляли себе больше заработанного, поэтому цены конкурентные. Какая у вас ставка сейчас и на чём работаете? Подготовлю расчёт под вашу работу."]
       }
     },
     {
       "tag": "competitor_pricing",
       "patterns": {
-        "en": ["another dispatcher charges 6%", "i pay 6 percent", "someone offered me 5%", "my current dispatcher charges", "i was quoted 7%", "another company charges less", "i get charged 6 percent", "competitor charges", "i'm paying 5 percent now"],
-        "sq": ["nje dispeçer tjeter merr 6%", "paguaj 6 perqind", "dikush me ofroi 5%", "dispeçeri im aktual merr", "me ofruan 7%", "nje kompani tjeter merr me pak", "po paguaj 5 perqind tani", "konkurrenti merr"]
+        "en": ["another dispatcher charges 6%", "i pay 6 percent", "someone offered me 5%", "my current dispatcher charges", "i was quoted 7%", "another company charges less", "i'm paying 5 percent now"],
+        "es": ["otro despachador cobra 6%", "pago 6 por ciento", "me ofrecieron 5%", "mi despachador actual cobra", "me cotizaron 7%", "otra empresa cobra menos", "ahora pago 5 por ciento"],
+        "ru": ["другой диспетчер берёт 6%", "я плачу 6 процентов", "мне предложили 5%", "мой нынешний диспетчер берёт", "мне назвали 7%", "другая компания берёт меньше", "сейчас плачу 5 процентов"]
       },
       "responses": {
         "en": ["Thanks for sharing that. We're often able to be more competitive while still providing full dispatch support — load sourcing, rate negotiation, broker communication, route planning, and paperwork. I'd love to have a team member put together a custom quote for your equipment and lanes. What do you run, and where do you like to drive?", "Appreciate you telling me. We aim to beat that wherever we can, with full support included. Let me get you a customized quote — what's your equipment type and preferred lanes?"],
-        "sq": ["Faleminderit që e ndatë. Shpesh mund të jemi më konkurrues duke ofruar mbështetje të plotë — gjetje ngarkesash, negocim çmimesh, komunikim me broker, planifikim rrugësh dhe dokumente. Do të doja që një anëtar i ekipit t'ju përgatisë një ofertë të personalizuar për automjetin dhe rrugët tuaja. Çfarë drejtoni dhe ku preferoni të vozisni?", "Faleminderit që ma thatë. Synojmë ta tejkalojmë atë kudo që mundemi, me mbështetje të plotë. Le t'ju përgatis një ofertë — cili është lloji i automjetit dhe rrugët e preferuara?"]
+        "es": ["Gracias por contarme. Muchas veces podemos ser más competitivos y con soporte completo — búsqueda de cargas, negociación de tarifas, comunicación con brokers, rutas y papeleo. Me encantaría que un compañero del equipo te prepare una cotización a la medida para tu equipo y rutas. ¿Qué manejas y por dónde te gusta rodar?", "Gracias por decírmelo. Buscamos mejorarlo donde se pueda, con soporte completo incluido. Te preparo una cotización personalizada — ¿qué tipo de equipo y qué rutas prefieres?"],
+        "ru": ["Спасибо, что сказали. Часто мы можем предложить выгоднее, и при этом полное сопровождение — поиск грузов, переговоры по ставкам, брокеры, маршруты и документы. Давайте коллега из команды подготовит индивидуальный расчёт под ваш прицеп и маршруты. На чём работаете и где предпочитаете ездить?", "Спасибо, что поделились. Стараемся улучшить условия, где возможно, с полным сопровождением. Подготовлю индивидуальный расчёт — какой у вас тип прицепа и любимые маршруты?"]
       }
     },
     {
       "tag": "why_choose",
       "patterns": {
-        "en": ["why choose you", "why cargoteer", "why should i use you", "what makes you different", "what's your advantage", "why not someone else", "what's special about you"],
-        "sq": ["pse t'ju zgjedh", "pse cargoteer", "pse te perdor ju", "cfare ju ben te ndryshem", "cili eshte avantazhi juaj", "pse jo dike tjeter", "cfare ju ben te vecante"]
+        "en": ["why choose you", "why cargoteer", "why should i use you", "what makes you different", "what's your advantage", "what's special about you"],
+        "es": ["por que elegirlos", "por que cargoteer", "por que usarlos", "que los hace diferentes", "cual es su ventaja", "que tienen de especial"],
+        "ru": ["почему именно вы", "почему cargoteer", "почему стоит работать с вами", "чем вы отличаетесь", "в чём ваше преимущество", "что в вас особенного"]
       },
       "responses": {
         "en": ["Carriers choose us for:\n✓ Competitive dispatch rates\n✓ Personalized support\n✓ Strong rate negotiation\n✓ Paperwork & broker communication handled\n✓ Built for owner-operators & small fleets\n✓ Focus on max revenue, minimal deadhead\nWant to see what we'd do for your trucks?", "We're focused on one thing: helping you keep more of what you earn — strong negotiation, personal support, less deadhead, and we handle the broker headaches. Want a quote?"],
-        "sq": ["Transportuesit na zgjedhin për:\n✓ Tarifa konkurruese dispeçimi\n✓ Mbështetje të personalizuar\n✓ Negocim të fortë çmimesh\n✓ Dokumente & komunikim me broker të mbuluara\n✓ Për pronarë-operatorë & flota të vogla\n✓ Fokus te të ardhurat maksimale, minimumi i kilometrave bosh\nDoni të shihni çfarë do të bënim për kamionët tuaj?", "Jemi të fokusuar te një gjë: t'ju ndihmojmë të mbani më shumë nga sa fitoni — negocim i fortë, mbështetje personale, më pak km bosh, dhe ne merremi me brokerat. Doni një ofertë?"]
+        "es": ["Los transportistas nos eligen por:\n✓ Tarifas de despacho competitivas\n✓ Soporte personalizado\n✓ Negociación fuerte de tarifas\n✓ Papeleo y brokers resueltos\n✓ Hecho para operadores-propietarios y flotas pequeñas\n✓ Enfoque en máximos ingresos y mínimas millas vacías\n¿Quieres ver qué haríamos por tus camiones?", "Nos enfocamos en una cosa: que te quedes con más de lo que ganas — negociación fuerte, soporte personal, menos millas vacías y nosotros lidiamos con los brokers. ¿Te cotizo?"],
+        "ru": ["Перевозчики выбирают нас за:\n✓ Конкурентные ставки диспетчера\n✓ Индивидуальную поддержку\n✓ Сильные переговоры по ставкам\n✓ Документы и брокеры — на нас\n✓ Для водителей-собственников и малых автопарков\n✓ Максимум дохода, минимум холостого пробега\nПоказать, что сделаем для ваших машин?", "Мы сосредоточены на одном: чтобы вы оставляли себе больше — сильные переговоры, личная поддержка, меньше холостого пробега, а брокеров берём на себя. Подготовить расчёт?"]
       }
     },
     {
       "tag": "get_started",
       "patterns": {
-        "en": ["i want to get started", "sign me up", "how do i sign up", "let's do it", "i'm interested", "set me up", "i want to join", "ready to start", "i want dispatch", "i need a dispatcher"],
-        "sq": ["dua te filloj", "me regjistro", "si te regjistrohem", "le ta bejme", "jam i interesuar", "me beni gati", "dua te bashkohem", "gati per te filluar", "dua dispeçim", "me duhet nje dispeçer"]
+        "en": ["i want to get started", "sign me up", "how do i sign up", "let's do it", "i'm interested", "i want to join", "i need a dispatcher", "i want dispatch"],
+        "es": ["quiero empezar", "registrame", "como me registro", "hagamoslo", "me interesa", "quiero unirme", "necesito un despachador", "quiero despacho"],
+        "ru": ["хочу начать", "запишите меня", "как зарегистрироваться", "давайте начнём", "мне интересно", "хочу присоединиться", "мне нужен диспетчер", "хочу диспетчера"]
       },
       "responses": {
         "en": ["Awesome — let's get you rolling. 🚛 What equipment do you run (dry van, reefer, flatbed, power-only…), and which lanes or areas do you prefer? I'll connect you with our dispatch team to finish setup and start finding loads.", "Great call! To set you up I'll need your equipment type and preferred lanes, plus your authority/MC. Share those and a team member will take it from there."],
-        "sq": ["Shkëlqyeshëm — t'ju vëmë në rrugë. 🚛 Çfarë automjeti drejtoni (dry van, reefer, flatbed, power-only…), dhe cilat rrugë ose zona preferoni? Ju lidh me ekipin tonë të dispeçimit për të përfunduar regjistrimin dhe për të nisur gjetjen e ngarkesave.", "Vendim i mirë! Për t'ju regjistruar më duhet lloji i automjetit, rrugët e preferuara dhe autoriteti/MC. Na i jepni dhe një anëtar i ekipit vazhdon që andej."]
+        "es": ["¡Excelente — vamos a ponerte a rodar! 🚛 ¿Qué equipo manejas (caja seca, refrigerado, plataforma, power-only…) y qué rutas o zonas prefieres? Te conecto con nuestro equipo de despacho para terminar el alta y empezar a buscar cargas.", "¡Buena decisión! Para darte de alta necesito tu tipo de equipo y rutas preferidas, más tu authority/MC. Compártelos y un compañero del equipo continúa."],
+        "ru": ["Отлично — поехали! 🚛 Какой у вас прицеп (тент/драй ван, рефрижератор, платформа, power-only…) и какие маршруты или регионы предпочитаете? Свяжу вас с нашей диспетчерской командой, чтобы завершить оформление и начать искать грузы.", "Отличное решение! Для оформления нужны ваш тип прицепа и предпочитаемые маршруты, плюс authority/MC. Пришлите их, и коллега из команды продолжит."]
       }
     },
     {
       "tag": "equipment",
       "patterns": {
-        "en": ["what equipment do you dispatch", "do you do reefer", "do you dispatch flatbed", "do you do dry van", "what trailers do you cover", "do you dispatch power only", "do you do box trucks", "do you handle hotshot"],
-        "sq": ["per cfare automjetesh dispeçoni", "a beni reefer", "a dispeçoni flatbed", "a beni dry van", "cfare rimorkiosh mbuloni", "a dispeçoni power only", "a beni kamione box", "a beni hotshot"]
+        "en": ["what equipment do you dispatch", "do you do reefer", "do you dispatch flatbed", "do you do dry van", "do you dispatch power only", "do you do box trucks", "do you handle hotshot"],
+        "es": ["que equipo despachan", "manejan refrigerado", "despachan plataforma", "manejan caja seca", "despachan power only", "manejan camiones de caja", "manejan hotshot"],
+        "ru": ["с каким прицепом работаете", "работаете с рефрижератором", "диспетчеризуете платформу", "работаете с тентом", "работаете power only", "работаете с бокс-траком", "работаете с хотшот"]
       },
       "responses": {
         "en": ["We dispatch for dry van, reefer, flatbed/step-deck, power-only, box trucks and hotshot. Whatever you run, we'll find freight that fits. What's your setup?", "Pretty much all of it — van, reefer, flatbed, power-only, hotshot. Tell me your equipment and I'll tailor the loads."],
-        "sq": ["Dispeçojmë për dry van, reefer, flatbed/step-deck, power-only, kamione box dhe hotshot. Çfarëdo që drejtoni, gjejmë ngarkesë që përshtatet. Cili është setup-i juaj?", "Pothuajse të gjitha — van, reefer, flatbed, power-only, hotshot. Më thoni automjetin dhe i përshtat ngarkesat."]
+        "es": ["Despachamos caja seca, refrigerado, plataforma/step-deck, power-only, camiones de caja y hotshot. Manejes lo que manejes, te buscamos carga que encaje. ¿Cuál es tu equipo?", "Prácticamente todo — caja seca, refrigerado, plataforma, power-only, hotshot. Dime tu equipo y ajusto las cargas."],
+        "ru": ["Работаем с тентом/драй ван, рефрижератором, платформой/степ-дек, power-only, бокс-траками и хотшот. На чём бы вы ни ездили, найдём подходящий груз. Какой у вас прицеп?", "Практически со всем — тент, реф, платформа, power-only, хотшот. Скажите ваш прицеп, и я подберу грузы."]
       }
     },
     {
       "tag": "paperwork",
       "patterns": {
-        "en": ["do you handle paperwork", "what about rate cons", "do you do broker setup", "do you handle invoicing", "do you do the documents", "paperwork", "do you set up brokers"],
-        "sq": ["a merreni me dokumente", "po rate con", "a beni regjistrimin me broker", "a merreni me faturim", "a i beni dokumentet", "dokumentet", "a regjistroni broker"]
+        "en": ["do you handle paperwork", "what about rate cons", "do you do broker setup", "do you handle invoicing", "do you do the documents", "do you set up brokers"],
+        "es": ["se encargan del papeleo", "y los rate cons", "hacen el alta con brokers", "manejan la facturacion", "hacen los documentos", "dan de alta brokers"],
+        "ru": ["вы занимаетесь документами", "а рейт-коны", "оформляете брокеров", "занимаетесь выставлением счетов", "делаете документы", "регистрируете брокеров"]
       },
       "responses": {
         "en": ["Yes — we handle rate confirmations, broker packets/setup, and the dispatch paperwork so you're not buried in admin. (For factoring/invoicing we can work with your provider.) Anything specific you need covered?", "We take care of the rate cons and broker setup that come with each load. Want us to walk through how we'd handle yours?"],
-        "sq": ["Po — merremi me rate confirmation, paketat/regjistrimin me broker dhe dokumentet e dispeçimit që ju të mos mbyteni në administratë. (Për faktoring/faturim punojmë me ofruesin tuaj.) Diçka specifike që ju duhet?", "Kujdesemi për rate con-et dhe regjistrimin me broker që vijnë me çdo ngarkesë. Doni t'ju shpjegoj si do t'i trajtonim tuajat?"]
+        "es": ["Sí — nos encargamos de los rate cons, los paquetes/alta con brokers y el papeleo del despacho para que no te entierres en trámites. (Para factoring/facturación trabajamos con tu proveedor.) ¿Algo específico que necesites cubrir?", "Nos encargamos de los rate cons y el alta con brokers de cada carga. ¿Te explico cómo manejaríamos lo tuyo?"],
+        "ru": ["Да — берём на себя рейт-коны, пакеты/оформление с брокерами и диспетчерские документы, чтобы вы не тонули в бумагах. (По факторингу/счетам работаем с вашим провайдером.) Что именно нужно закрыть?", "Берём на себя рейт-коны и оформление брокеров по каждому грузу. Рассказать, как сделаем это для вас?"]
       }
     },
     {
       "tag": "rate_negotiation",
       "patterns": {
-        "en": ["do you negotiate rates", "will you get me better rates", "how good are your rates", "do you haggle with brokers", "can you get more money per load", "better paying loads"],
-        "sq": ["a negocioni cmimet", "a me merrni cmime me te mira", "sa te mira jane cmimet tuaja", "a beni pazar me broker", "a me merrni me shume para per ngarkese", "ngarkesa me te paguara"]
+        "en": ["do you negotiate rates", "will you get me better rates", "do you haggle with brokers", "can you get more money per load", "better paying loads"],
+        "es": ["negocian tarifas", "me consiguen mejores tarifas", "regatean con los brokers", "consiguen mas dinero por carga", "cargas mejor pagadas"],
+        "ru": ["вы договариваетесь о ставках", "поможете поднять ставки", "торгуетесь с брокерами", "можете выбить больше за груз", "более выгодные грузы"]
       },
       "responses": {
         "en": ["Rate negotiation is our bread and butter — we push brokers for the best-paying freight and won't book cheap freight that doesn't work for you. What rate per mile are you targeting?", "Absolutely. We negotiate hard so you're running profitable miles, not cheap ones. What lanes are you focused on?"],
-        "sq": ["Negocimi i çmimeve është pikë e fortë e jona — i shtyjmë brokerat për ngarkesat më të paguara dhe nuk rezervojmë ngarkesa të lira që s'ju leverdisin. Çfarë çmimi për milje synoni?", "Sigurisht. Negociojmë fort që të bëni milje fitimprurëse, jo të lira. Te cilat rrugë jeni fokusuar?"]
+        "es": ["La negociación de tarifas es lo nuestro — presionamos a los brokers por las cargas mejor pagadas y no aceptamos fletes baratos que no te convienen. ¿Qué tarifa por milla buscas?", "Claro que sí. Negociamos duro para que ruedes millas rentables, no baratas. ¿En qué rutas te enfocas?"],
+        "ru": ["Переговоры по ставкам — наш конёк: выбиваем у брокеров самые выгодные грузы и не берём дешёвые, которые вам невыгодны. На какую ставку за милю ориентируетесь?", "Однозначно. Жёстко торгуемся, чтобы вы ехали по прибыльным, а не дешёвым ставкам. На каких маршрутах сосредоточены?"]
       }
     },
     {
       "tag": "owner_operator",
       "patterns": {
-        "en": ["i'm an owner operator", "i have one truck", "i run a small fleet", "i have 3 trucks", "do you work with single trucks", "do you take small fleets", "i'm a single truck"],
-        "sq": ["jam pronar operator", "kam nje kamion", "drejtoj nje flote te vogel", "kam 3 kamione", "a punoni me kamione te vetem", "a pranoni flota te vogla", "jam me nje kamion"]
+        "en": ["i'm an owner operator", "i have one truck", "i run a small fleet", "i have 3 trucks", "do you work with single trucks", "do you take small fleets"],
+        "es": ["soy operador propietario", "tengo un camion", "manejo una flota pequena", "tengo 3 camiones", "trabajan con un solo camion", "aceptan flotas pequenas"],
+        "ru": ["я водитель собственник", "у меня один грузовик", "у меня небольшой автопарк", "у меня 3 грузовика", "работаете с одной машиной", "берёте небольшие автопарки"]
       },
       "responses": {
         "en": ["Perfect — owner-operators and small fleets are exactly who we're built for. You'll get personal dispatch attention, not a number in a queue. Want a quote for your truck(s)?", "That's our sweet spot. Whether it's one truck or a few, we give you dedicated, personal dispatch. Ready to talk setup?"],
-        "sq": ["Perfekt — pronarë-operatorët dhe flotat e vogla janë pikërisht ata për të cilët jemi ndërtuar. Merrni vëmendje personale dispeçimi, jo një numër në radhë. Doni një ofertë për kamionin/kamionët tuaj?", "Ky është pikërisht specialiteti ynë. Qoftë një kamion apo disa, ju japim dispeçim të dedikuar e personal. Gati të flasim për regjistrimin?"]
+        "es": ["Perfecto — los operadores-propietarios y las flotas pequeñas son justo para quienes trabajamos. Tendrás atención personal de despacho, no un número en la fila. ¿Te cotizo para tu(s) camión(es)?", "Ese es nuestro fuerte. Sea un camión o varios, te damos despacho dedicado y personal. ¿Hablamos del alta?"],
+        "ru": ["Отлично — водители-собственники и небольшие автопарки это именно для кого мы работаем. Получите личное внимание диспетчера, а не номер в очереди. Подготовить расчёт под ваш(и) грузовик(и)?", "Это наш профиль. Один грузовик или несколько — даём персональное диспетчерское сопровождение. Обсудим оформление?"]
       }
     },
     {
       "tag": "hours",
       "patterns": {
-        "en": ["what are your hours", "when are you available", "are you open now", "do you work weekends", "what time can i reach you", "availability"],
-        "sq": ["cilat jane oraret", "kur jeni te disponueshem", "a jeni hapur tani", "a punoni fundjave", "ne cilen ore mund t'ju arrij", "disponueshmeria"]
+        "en": ["what are your hours", "when are you available", "are you open now", "do you work weekends", "availability"],
+        "es": ["cual es su horario", "cuando estan disponibles", "estan abiertos ahora", "trabajan fines de semana", "disponibilidad"],
+        "ru": ["какой у вас график", "когда вы доступны", "вы сейчас работаете", "работаете в выходные", "доступность"]
       },
       "responses": {
         "en": ["Our dispatch team covers business hours Monday–Saturday and we plan loads ahead so your week stays booked. Message anytime — we'll get right back to you. What do you need?", "We're available through the work week and Saturdays, and we line up loads in advance. How can I help right now?"],
-        "sq": ["Ekipi ynë i dispeçimit mbulon orarin e punës të hënë–të shtunë dhe planifikojmë ngarkesat paraprakisht që java t'ju rrijë e zënë. Na shkruani kurdo — ju kthehemi menjëherë. Çfarë ju nevojitet?", "Jemi të disponueshëm gjatë javës dhe të shtunave, dhe rreshtojmë ngarkesat paraprakisht. Si mund t'ju ndihmoj tani?"]
+        "es": ["Nuestro equipo de despacho cubre horario de lunes a sábado y planeamos las cargas con anticipación para que tu semana quede llena. Escríbenos cuando quieras — te respondemos enseguida. ¿Qué necesitas?", "Estamos disponibles entre semana y los sábados, y organizamos las cargas con tiempo. ¿En qué te ayudo ahora?"],
+        "ru": ["Наша диспетчерская работает с понедельника по субботу, и мы планируем грузы заранее, чтобы неделя была занята. Пишите в любое время — быстро ответим. Что вам нужно?", "Мы на связи в будни и по субботам и подбираем грузы заранее. Чем могу помочь прямо сейчас?"]
       }
     },
     {
       "tag": "contact",
       "patterns": {
-        "en": ["how do i contact you", "phone number", "email", "how can i reach you", "talk to someone", "call me", "i want to speak to a person", "contact info", "talk to a dispatcher", "speak to the team"],
-        "sq": ["si mund t'ju kontaktoj", "numri i telefonit", "email", "si mund t'ju arrij", "te flas me dike", "me merr ne telefon", "dua te flas me nje person", "informacion kontakti", "te flas me nje dispeçer", "flas me ekipin"]
+        "en": ["how do i contact you", "phone number", "email", "how can i reach you", "talk to someone", "call me", "i want to speak to a person", "talk to a dispatcher"],
+        "es": ["como los contacto", "numero de telefono", "correo", "como puedo comunicarme", "hablar con alguien", "llamenme", "quiero hablar con una persona", "hablar con un despachador"],
+        "ru": ["как с вами связаться", "номер телефона", "почта", "как вас найти", "поговорить с кем-то", "перезвоните мне", "хочу поговорить с человеком", "связаться с диспетчером"]
       },
       "responses": {
         "en": ["I can have someone from our dispatch team reach out right away. 📞 What's the best number or email, and a bit about your operation (equipment + lanes)? You can also reach us at dispatch@cargoteer.com.", "Let's get you connected with the team. Drop your phone/email and what you run, and we'll follow up fast. (dispatch@cargoteer.com)"],
-        "sq": ["Mund të bëj që dikush nga ekipi ynë i dispeçimit t'ju kontaktojë menjëherë. 📞 Cili është numri ose email-i më i mirë, dhe pak për operacionin tuaj (automjeti + rrugët)? Mund të na shkruani edhe te dispatch@cargoteer.com.", "Le t'ju lidhim me ekipin. Lini telefonin/email-in dhe çfarë drejtoni, dhe ju kontaktojmë shpejt. (dispatch@cargoteer.com)"]
+        "es": ["Puedo hacer que alguien de nuestro equipo de despacho te contacte enseguida. 📞 ¿Cuál es el mejor número o correo, y algo sobre tu operación (equipo + rutas)? También puedes escribirnos a dispatch@cargoteer.com.", "Te conecto con el equipo. Déjame tu teléfono/correo y qué manejas, y te contactamos rápido. (dispatch@cargoteer.com)"],
+        "ru": ["Могу сразу попросить кого-то из нашей диспетчерской связаться с вами. 📞 Какой лучший номер или почта, и пару слов о вашей работе (прицеп + маршруты)? Также можно написать на dispatch@cargoteer.com.", "Свяжу вас с командой. Оставьте телефон/почту и на чём работаете — быстро свяжемся. (dispatch@cargoteer.com)"]
       }
     }
   ]

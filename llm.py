@@ -5,7 +5,7 @@ It lets the bot answer freely — including questions we never pre-wrote — in 
 customer's own language, while staying grounded in Cargoteer's real facts.
 
 Provider is auto-selected from whichever key is set:
-  • Gemini  (GEMINI_API_KEY)  — free tier, strong Albanian + English
+  • Gemini  (GEMINI_API_KEY)  — free tier, strong multilingual (EN/ES/RU)
   • OpenAI  (OPENAI_API_KEY)  — pay-as-you-go fallback
 If none is set (or a call fails for any reason) generate_reply() returns None,
 so the caller falls back to the free local brain (brain.py). The bot is never

@@ -25,7 +25,17 @@ PROFILE = {
         {"locale": "default",
          "text": "Welcome to Cargoteer! 👋 We dispatch for owner-operators and "
                  "small fleets — best-paying loads, strong rate negotiation, and "
-                 "we handle brokers & paperwork. Message us to get started."}
+                 "we handle brokers & paperwork. Message us to get started."},
+        {"locale": "es_LA",
+         "text": "¡Bienvenido a Cargoteer! 👋 Despachamos para operadores-"
+                 "propietarios y flotas pequeñas — las cargas mejor pagadas, "
+                 "negociación fuerte de tarifas, y manejamos brokers y papeleo. "
+                 "Escríbenos para empezar."},
+        {"locale": "ru_RU",
+         "text": "Добро пожаловать в Cargoteer! 👋 Мы диспетчеры для водителей-"
+                 "собственников и небольших автопарков — самые выгодные грузы, "
+                 "сильные переговоры по ставкам, берём на себя брокеров и "
+                 "документы. Напишите нам, чтобы начать."}
     ],
     "ice_breakers": [
         {"locale": "default",

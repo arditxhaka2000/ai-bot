@@ -18,9 +18,14 @@ def intent_of(text):
 
 # --- language detection -------------------------------------------------------
 
-def test_detects_albanian():
-    assert detect_language("Përshëndetje, sa është tarifa?") == "sq"
-    assert detect_language("si funksionon dispeçimi") == "sq"
+def test_detects_spanish():
+    assert detect_language("Hola, ¿cuánto cobran?") == "es"
+    assert detect_language("quiero empezar con un despachador") == "es"
+
+
+def test_detects_russian():
+    assert detect_language("Здравствуйте, сколько вы берёте?") == "ru"
+    assert detect_language("хочу начать работать с диспетчером") == "ru"
 
 
 def test_detects_english():
@@ -28,21 +33,23 @@ def test_detects_english():
 
 
 def test_fold_strips_diacritics():
-    assert fold("Përshëndetje") == "pershendetje"
-    assert fold("ÇMIMI") == "cmimi"
+    assert fold("¿Cuánto?") == "¿cuanto?"
+    assert fold("ESPAÑA") == "espana"
 
 
 # --- core dispatch intents ----------------------------------------------------
 
-def test_greeting_both_languages():
+def test_greeting_all_languages():
     assert intent_of("hi there") == "greeting"
-    assert intent_of("pershendetje") == "greeting"
+    assert intent_of("hola buenas") == "greeting"
+    assert intent_of("привет") == "greeting"
 
 
 def test_pricing():
     assert intent_of("how much do you charge") == "pricing"
     assert intent_of("what's your dispatch fee") == "pricing"
-    assert intent_of("sa eshte tarifa") == "pricing"
+    assert intent_of("cuanto cobran") == "pricing"
+    assert intent_of("сколько вы берёте") == "pricing"
 
 
 def test_competitor_pricing():
@@ -82,7 +89,8 @@ def test_equipment_and_owner_operator():
 
 def test_typo_tolerance():
     assert intent_of("helo") == "greeting"
-    assert intent_of("what do you chardge") == "pricing"
+    assert intent_of("pricng") == "pricing"
+    assert intent_of("whats your raet") == "pricing"
 
 
 def test_unknown_vocab_falls_back():
@@ -94,7 +102,8 @@ def test_frustration_detection():
 
 
 def test_reply_language_matches_user():
-    assert brain.reply_with_state("sa eshte tarifa")["lang"] == "sq"
+    assert brain.reply_with_state("cuanto cobran")["lang"] == "es"
+    assert brain.reply_with_state("сколько вы берёте")["lang"] == "ru"
     assert brain.reply_with_state("what do you charge")["lang"] == "en"
 
 
@@ -103,11 +112,11 @@ def test_compound_social_plus_question_prefers_question():
     assert intent_of("hey, what do you charge?") == "pricing"
 
 
-def test_language_falls_back_to_matched_pattern():
-    # "si funksionon" has no marker words but matches an Albanian pattern.
-    r = brain.reply_with_state("si funksionon")
-    assert r["intent"] == "how_it_works"
-    assert r["lang"] == "sq"
+def test_russian_intent_matching():
+    # Cyrillic input should still match the right intent and reply in Russian.
+    r = brain.reply_with_state("хочу начать")
+    assert r["intent"] == "get_started"
+    assert r["lang"] == "ru"
 
 
 # --- classify + learning ------------------------------------------------------

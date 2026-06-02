@@ -5,15 +5,15 @@ service for owner-operators and small fleets. It answers carriers as a **human
 dispatch representative** (never identifies as a bot), handles pricing the way
 the team wants, and captures leads. An LLM (Gemini) writes the replies; a free,
 self-contained **local brain** is the always-on fallback so the bot is never
-down. Bilingual (English + Albanian).
+down. Trilingual (English, Spanish, Russian).
 
 ## How the brain works
 
 Four cooperating layers (see `brain.py`):
 
-- **Language detection** — decides whether the carrier wrote in **English** or
-  **Albanian** (diacritics like `ë`/`ç` plus marker words) and replies in that
-  language. Language is *sticky* across a conversation.
+- **Language detection** — detects **English**, **Spanish**, or **Russian**
+  (Cyrillic script for Russian; Spanish characters/marker words otherwise) and
+  replies in that language. Language is *sticky* across a conversation.
 - **Intent matching** — every example phrase becomes two TF-IDF vectors: a
   *word* signal (content words, accent-folded) and a *character* signal (shrugs
   off typos like "helo" → "hello"). An incoming message is compared to
@@ -33,7 +33,7 @@ retrains instantly).
 
 The local brain above is fast, free, and never down — but it only answers what's
 in `knowledge.json`. To let the bot **formulate brand-new sentences for
-questions you never pre-wrote** (in English *or* Albanian), add an LLM key and it
+questions you never pre-wrote** (in English, Spanish, or Russian), add an LLM key and it
 becomes the *first* brain; the local brain stays as the always-on fallback.
 
 - **Provider** — auto-selected: **Gemini** if `GEMINI_API_KEY` is set, else
@@ -116,7 +116,7 @@ human handoff, rate limiting, and graceful fallback.
 | `responder.py` | Orchestrator: handoff, rate limit, tracking/quote, LLM→local routing |
 | `llm.py` | Generative brain — Gemini/OpenAI, grounded in your knowledge base |
 | `brain.py` | The local AI brain (language + entities + matching + fallback + learning) |
-| `knowledge.json` | What the bot knows, bilingual (en/sq) — **edit this to customise it** |
+| `knowledge.json` | What the bot knows, trilingual (en/es/ru) — **edit this to customise it** |
 | `store.py` | Persistence (SQLite/Turso): history, state, audit, leads |
 | `messenger.py` | Send API wrapper: typing, splitting, retries, quick replies, dedup |
 | `setup_messenger_profile.py` | One-time Get Started / menu / ice-breakers setup |

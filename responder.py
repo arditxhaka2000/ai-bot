@@ -46,23 +46,32 @@ ESCALATE_AFTER = 2     # consecutive frustrated messages -> human
 _ACTIONABLE = {"get_started", "pricing", "competitor_pricing"}
 
 _HANDOFF_TRIGGERS = (
+    # English
     "talk to a human", "talk to a person", "speak to someone", "real person",
     "live agent", "customer service", "representative", "agent", "operator",
     "talk to a dispatcher", "speak to the team", "call me",
-    "dua nje operator", "dua te flas me nje njeri", "me lidh me operator",
-    "flas me dike", "perfaqesues", "njeri real", "me merr ne telefon",
+    # Spanish
+    "hablar con una persona", "hablar con alguien", "persona real", "agente",
+    "operador", "representante", "servicio al cliente", "llamenme",
+    "hablar con un despachador",
+    # Russian
+    "оператор", "человек", "менеджер", "живой человек", "поговорить с человеком",
+    "свяжите с человеком", "перезвоните мне", "позвоните мне",
 )
-_RESUME_TRIGGERS = ("bot", "assistant", "menu", "start over", "rifillo",
-                    "vazhdo", "continue")
+_RESUME_TRIGGERS = ("bot", "assistant", "menu", "start over", "continue",
+                    "continuar", "seguir", "продолжить", "бот", "меню")
 
 
-def _t(lang, en, sq):
-    return sq if lang == "sq" else en
+def _loc(lang, **by_lang):
+    """Pick a localized string by language, falling back to English."""
+    return by_lang.get(lang) or by_lang["en"]
 
 
 def _quick_replies(lang):
-    if lang == "sq":
-        return ["💲 Çmimi", "🚚 Si funksionon", "📝 Fillo", "🧑 Fol me ekipin"]
+    if lang == "es":
+        return ["💲 Precio", "🚚 Cómo funciona", "📝 Empezar", "🧑 Hablar con el equipo"]
+    if lang == "ru":
+        return ["💲 Цена", "🚚 Как работает", "📝 Начать", "🧑 Связаться с командой"]
     return ["💲 Pricing", "🚚 How it works", "📝 Get started", "🧑 Talk to a rep"]
 
 
@@ -75,10 +84,20 @@ def respond(sender_id, text, channel="messenger"):
 
     # 0) Get Started ----------------------------------------------------------
     if text == "GET_STARTED":
-        msg = ("Welcome to Cargoteer! 👋 We dispatch for owner-operators and "
+        msg = _loc(
+            lang,
+            en="Welcome to Cargoteer! 👋 We dispatch for owner-operators and "
                "small fleets — finding the best-paying loads, negotiating "
                "rates, and handling brokers and paperwork. What are you "
-               "running, and how can we help?")
+               "running, and how can we help?",
+            es="¡Bienvenido a Cargoteer! 👋 Despachamos para operadores-"
+               "propietarios y flotas pequeñas — buscamos las cargas mejor "
+               "pagadas, negociamos tarifas y manejamos brokers y papeleo. "
+               "¿Qué manejas y cómo te ayudamos?",
+            ru="Добро пожаловать в Cargoteer! 👋 Мы диспетчеры для водителей-"
+               "собственников и небольших автопарков — находим самые выгодные "
+               "грузы, договариваемся о ставках и берём на себя брокеров и "
+               "документы. На чём работаете и чем помочь?")
         return _finish(sender_id, "GET_STARTED", msg, _quick_replies(lang),
                        "get_started", channel, lang)
 
@@ -89,9 +108,11 @@ def respond(sender_id, text, channel="messenger"):
 
     # 1) Rate limit -----------------------------------------------------------
     if _rate_limited(sender_id):
-        msg = _t(lang,
-                 "Whoa, lots of messages coming in — give me a sec to catch up. 🙏",
-                 "Po vijnë shumë mesazhe — më jepni një moment të vij pas. 🙏")
+        msg = _loc(
+            lang,
+            en="Whoa, lots of messages coming in — give me a sec to catch up. 🙏",
+            es="¡Cuántos mensajes! Dame un segundo para ponerme al día. 🙏",
+            ru="Ого, много сообщений — дайте секунду, чтобы успеть. 🙏")
         return _finish(sender_id, text, msg, None, "ratelimit", channel, lang)
 
     # Always capture shared contact info, whatever the message routes to.
@@ -103,8 +124,11 @@ def respond(sender_id, text, channel="messenger"):
     if state.get("handoff"):
         if any(k == folded or k in folded.split() for k in _RESUME_TRIGGERS):
             store.set_state(sender_id, handoff=False)
-            msg = _t(lang, "I'm here and happy to keep helping — what do you need?",
-                     "Jam këtu dhe me kënaqësi vazhdoj t'ju ndihmoj — çfarë ju duhet?")
+            msg = _loc(
+                lang,
+                en="I'm here and happy to keep helping — what do you need?",
+                es="Aquí estoy y con gusto sigo ayudándote — ¿qué necesitas?",
+                ru="Я на связи и рад продолжить помогать — что вам нужно?")
             return _finish(sender_id, text, msg, _quick_replies(lang),
                            "resume", channel, lang)
         return _finish(sender_id, text, None, None, "handoff-silent",
@@ -166,19 +190,26 @@ def _do_handoff(sender_id, text, channel, lang, kind, source):
     store.add_lead(sender_id, channel, kind, text)
     _notify(f"🔔 Handoff ({kind}) for {sender_id} [{channel}]: {text!r}")
     if source == "escalation":
-        msg = _t(lang,
-                 "I hear you, and I'm sorry for the hassle. 🙏 I'm bringing in a "
-                 "teammate to help you directly — they'll jump in here shortly.",
-                 "Ju kuptoj, dhe më vjen keq për bezdinë. 🙏 Po sjell një koleg "
-                 "që t'ju ndihmojë drejtpërdrejt — do të hyjë këtu shpejt.")
+        msg = _loc(
+            lang,
+            en="I hear you, and I'm sorry for the hassle. 🙏 I'm bringing in a "
+               "teammate to help you directly — they'll jump in here shortly.",
+            es="Te entiendo y lamento la molestia. 🙏 Voy a traer a un compañero "
+               "del equipo para ayudarte directamente — se unirá aquí en breve.",
+            ru="Понимаю вас, извините за неудобства. 🙏 Подключаю коллегу, чтобы "
+               "помочь напрямую — он скоро ответит здесь.")
     else:
-        msg = _t(lang,
-                 "Absolutely — I'll get a teammate to reach out to you directly. "
-                 "You can also email us at dispatch@cargoteer.com. Mind sharing "
-                 "your equipment and lanes so we're ready to help?",
-                 "Sigurisht — bëj që një koleg t'ju kontaktojë drejtpërdrejt. "
-                 "Mund të na shkruani edhe te dispatch@cargoteer.com. Mund të na "
-                 "thoni automjetin dhe rrugët që të jemi gati t'ju ndihmojmë?")
+        msg = _loc(
+            lang,
+            en="Absolutely — I'll get a teammate to reach out to you directly. "
+               "You can also email us at dispatch@cargoteer.com. Mind sharing "
+               "your equipment and lanes so we're ready to help?",
+            es="¡Claro! Haré que un compañero del equipo te contacte "
+               "directamente. También puedes escribirnos a dispatch@cargoteer.com. "
+               "¿Me dices tu equipo y tus rutas para estar listos para ayudarte?",
+            ru="Конечно — попрошу коллегу связаться с вами напрямую. Также можно "
+               "написать на dispatch@cargoteer.com. Подскажите ваш прицеп и "
+               "маршруты, чтобы мы были готовы помочь?")
     return _finish(sender_id, text, msg, None, source, channel, lang)
 
 

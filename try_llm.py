@@ -13,10 +13,10 @@ language-matched replies. If no key is set, it tells you and exits.
 import llm
 
 PROBES = [
-    "Hi, do you deliver fragile glass items and how should I pack them?",
-    "Përshëndetje, a mund të dërgoj një dhuratë surprizë pa e ditur marrësi çmimin?",
-    "what's the capital of France?",          # off-topic — should steer back
-    "sa kushton me dergu nje pako 5 kg ne Prishtine?",
+    "Hi, what do you charge for dispatch? I run a dry van.",
+    "Hola, ¿cuánto cobran de despacho? Manejo caja seca.",   # Spanish
+    "Здравствуйте, сколько вы берёте? У меня рефрижератор.",  # Russian
+    "what's the capital of France?",   # off-topic — should steer back
 ]
 
 
